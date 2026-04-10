@@ -14,3 +14,7 @@ Route::get('/login', function () {
 Route::get('/register', function () {
     return Inertia::render('auth/Registration');
 })->name('register');
+
+
+require __DIR__ . '/auth.php';
+require __DIR__ . '/buyer.php';
