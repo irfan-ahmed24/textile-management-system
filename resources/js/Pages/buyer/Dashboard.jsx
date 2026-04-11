@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 
 function Dashboard() {
-    // ডামি ডাটা (ডিজাইনের জন্য)
     const stats = [
         {
             label: "Active Orders",
