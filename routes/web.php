@@ -18,3 +18,4 @@ Route::get('/register', function () {
 
 require __DIR__ . '/auth.php';
 require __DIR__ . '/buyer.php';
+require __DIR__ . '/admin.php';
