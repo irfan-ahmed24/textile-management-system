@@ -7,9 +7,6 @@ Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
 
-Route::get('/login', function () {
-    return Inertia::render('auth/Login');
-})->name('login');
 
 Route::get('/register', function () {
     return Inertia::render('auth/Registration');

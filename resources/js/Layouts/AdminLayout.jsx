@@ -41,20 +41,23 @@ export default function AdminLayout({ children, header }) {
             title: "New Order",
             desc: "Order #TX-902 received.",
             time: "2m ago",
-            unread: true,
         },
         {
             id: 2,
             title: "Stock Alert",
             desc: "Chemical stock is low.",
             time: "1h ago",
-            unread: true,
         },
     ];
 
+    // এখানে আমরা route গুলো আপডেট করে দিয়েছি
     const navigation = [
         { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-        { name: "User Management", href: "/admin/users", icon: Users },
+        {
+            name: "User Management",
+            href: "/admin/user-management",
+            icon: Users,
+        }, // আপডেট করা রাউট
         { name: "Inventory Reports", href: "/admin/inventory", icon: Database },
         { name: "Order Requests", href: "/admin/orders", icon: ShoppingCart },
         {
@@ -207,7 +210,6 @@ export default function AdminLayout({ children, header }) {
                     </div>
 
                     <div className="flex items-center gap-3 sm:gap-6">
-                        {/* Search Section */}
                         <div className="relative flex items-center">
                             <AnimatePresence>
                                 {isSearchOpen && (
@@ -222,19 +224,18 @@ export default function AdminLayout({ children, header }) {
                             </AnimatePresence>
                             <button
                                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                                className="p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 hover:text-indigo-400"
+                                className="p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 hover:text-indigo-400 transition-colors"
                             >
                                 <Search size={20} />
                             </button>
                         </div>
 
-                        {/* Notification Section */}
                         <div className="relative">
                             <button
                                 onClick={() =>
                                     setIsNotificationsOpen(!isNotificationsOpen)
                                 }
-                                className={`p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 relative hover:text-indigo-400 ${isNotificationsOpen ? "bg-indigo-600/10 border-indigo-500/50" : ""}`}
+                                className={`p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 relative hover:text-indigo-400 transition-colors ${isNotificationsOpen ? "bg-indigo-600/10 border-indigo-500/50" : ""}`}
                             >
                                 <Bell size={20} />
                                 <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-indigo-500 rounded-full ring-2 ring-[#080B11]"></span>
@@ -263,13 +264,13 @@ export default function AdminLayout({ children, header }) {
                                                         key={n.id}
                                                         className="p-4 border-b border-white/5 hover:bg-white/5 transition cursor-pointer"
                                                     >
-                                                        <p className="text-sm font-bold">
+                                                        <p className="text-sm font-bold text-slate-200">
                                                             {n.title}
                                                         </p>
                                                         <p className="text-xs text-slate-500 mt-1">
                                                             {n.desc}
                                                         </p>
-                                                        <p className="text-[10px] text-slate-600 mt-2 font-bold uppercase">
+                                                        <p className="text-[10px] text-slate-600 mt-2 font-bold uppercase tracking-widest">
                                                             {n.time}
                                                         </p>
                                                     </div>
@@ -281,7 +282,6 @@ export default function AdminLayout({ children, header }) {
                             </AnimatePresence>
                         </div>
 
-                        {/* Profile Dropdown Section */}
                         <div className="relative">
                             <div
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -290,14 +290,14 @@ export default function AdminLayout({ children, header }) {
                                 <div className="h-8 w-8 rounded-lg bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg shadow-indigo-600/20 text-sm">
                                     AD
                                 </div>
-                                <div className="hidden sm:block text-left">
+                                <div className="hidden sm:block text-left mr-1">
                                     <p className="text-xs font-bold text-slate-200 leading-none">
                                         Admin Root
                                     </p>
                                 </div>
                                 <ChevronDown
                                     size={14}
-                                    className={`text-slate-500 transition-transform ${isProfileOpen ? "rotate-180" : ""}`}
+                                    className={`text-slate-500 transition-transform duration-300 ${isProfileOpen ? "rotate-180" : ""}`}
                                 />
                             </div>
                             <AnimatePresence>
@@ -336,7 +336,7 @@ export default function AdminLayout({ children, header }) {
                         </div>
                     </div>
                 </header>
-                <main className="flex-1 overflow-y-auto p-4 lg:p-10 custom-scrollbar">
+                <main className="flex-1 overflow-y-auto p-4 lg:p-10 custom-scrollbar bg-[#0F1219]">
                     {children}
                 </main>
             </motion.div>
