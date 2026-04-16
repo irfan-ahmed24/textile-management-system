@@ -38,28 +38,44 @@ export default function InventoryLayout({ children, header }) {
     const navigation = [
         {
             name: "Inv. Dashboard",
-            href: "/inventory/dashboard",
+            href: "/inventory-manager/dashboard",
             icon: LayoutDashboard,
         },
-        { name: "Raw Materials", href: "/inventory/materials", icon: Database },
+        {
+            name: "Raw Materials",
+            href: "/inventory-manager/materials",
+            icon: Database,
+        },
         {
             name: "Stock Entry (+)",
-            href: "/inventory/stock-in",
+            href: "/inventory-manager/stock-in",
             icon: PlusCircle,
         },
         {
             name: "Stock Dispatch (-)",
-            href: "/inventory/stock-out",
+            href: "/inventory-manager/stock-out",
             icon: MinusCircle,
         },
-        { name: "Suppliers", href: "/inventory/suppliers", icon: Truck },
+        {
+            name: "Suppliers",
+            href: "/inventory-manager/suppliers",
+            icon: Truck,
+        },
         {
             name: "Low Stock Alerts",
-            href: "/inventory/alerts",
+            href: "/inventory-manager/alerts",
             icon: AlertTriangle,
         },
-        { name: "Waste Management", href: "/inventory/waste", icon: Trash2 },
-        { name: "Settings", href: "/inventory/settings", icon: Settings },
+        {
+            name: "Waste Management",
+            href: "/inventory-manager/waste",
+            icon: Trash2,
+        },
+        {
+            name: "Settings",
+            href: "/inventory-manager/settings",
+            icon: Settings,
+        },
     ];
 
     const SidebarContent = (isMobile = false) => (

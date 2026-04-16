@@ -1,7 +1,12 @@
 <?php
 
-use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\InventoryController;
 
-Route::get('/inventory-manager/dashboard', function () {
-    return Inertia::render('Inventory_manager/Dashboard');
-})->name('inventory.dashboard');
+Route::middleware(['auth'])->prefix('inventory-manager')->group(function () {
+
+    Route::get('/dashboard', function () {
+        return inertia('Inventory_manager/Dashboard');
+    })->name('inventory.dashboard');
+
+});

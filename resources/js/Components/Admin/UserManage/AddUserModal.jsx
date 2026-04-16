@@ -36,7 +36,7 @@ function AddUserModal({ isOpen, onClose }) {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        post("/admin/user_management/store", {
+        post("/admin/user-management/store", {
             onSuccess: (page) => {
                 setCreatedUser({ email: data.email, password: data.password }); // ডাটা সেভ করে রাখা
                 setShowSuccess(true); // সাকসেস পপআপ দেখানো
