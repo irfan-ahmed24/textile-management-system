@@ -57,11 +57,6 @@ export default function InventoryLayout({ children, header }) {
             icon: MinusCircle,
         },
         {
-            name: "Suppliers",
-            href: "/inventory-manager/suppliers",
-            icon: Truck,
-        },
-        {
             name: "Low Stock Alerts",
             href: "/inventory-manager/alerts",
             icon: AlertTriangle,
