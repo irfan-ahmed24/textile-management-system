@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import InventoryLayout from "@/Layouts/InventoryLayout";
 import { Head } from "@inertiajs/react";
 import { motion } from "framer-motion";
@@ -8,14 +8,12 @@ import {
     MoreVertical,
     Package,
     AlertTriangle,
-    CheckCircle2,
-    ArrowUpDown,
     Download,
 } from "lucide-react";
 
 function Materials() {
-    // ডিজাইন টেস্ট করার জন্য কিছু ফেক ডাটা
-    const materials = [
+    // অরিজিনাল ডাটা
+    const initialMaterials = [
         {
             id: 1,
             name: "Cotton Yarn 30s",
@@ -62,6 +60,21 @@ function Materials() {
         },
     ];
 
+    const [searchTerm, setSearchTerm] = useState("");
+    const [filteredMaterials, setFilteredMaterials] =
+        useState(initialMaterials);
+
+    // সার্চ লজিক
+    useEffect(() => {
+        const results = initialMaterials.filter(
+            (item) =>
+                item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                item.category.toLowerCase().includes(searchTerm.toLowerCase()),
+        );
+        setFilteredMaterials(results);
+    }, [searchTerm]);
+
     return (
         <InventoryLayout>
             <Head title="Materials Inventory | TextileMS" />
@@ -75,17 +88,23 @@ function Materials() {
                             Materials Inventory
                         </h1>
                         <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">
-                            Manage and track all raw materials and stock levels
+                            Live tracking of your inventory stock
                         </p>
                     </div>
 
-                    <div className="flex gap-3">
-                        <button className="bg-white/5 hover:bg-white/10 text-white px-4 py-2 rounded-xl border border-white/10 transition-all flex items-center gap-2 text-sm font-bold">
-                            <Download size={18} /> Export
-                        </button>
-                        <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2 shadow-lg shadow-blue-600/20 transition-all">
-                            + Add New Item
-                        </button>
+                    {/* Search Bar in Header Area */}
+                    <div className="relative w-full md:w-96 group">
+                        <Search
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors"
+                            size={20}
+                        />
+                        <input
+                            type="text"
+                            placeholder="Search by name, code or category..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full bg-[#0F1219] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 transition-all shadow-2xl"
+                        />
                     </div>
                 </div>
 
@@ -93,118 +112,126 @@ function Materials() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <StatCard
                         title="Total Items"
-                        value="128"
+                        value={filteredMaterials.length}
                         icon={<Package className="text-blue-500" />}
                         color="blue"
                     />
                     <StatCard
                         title="Low Stock Items"
-                        value="12"
+                        value={
+                            filteredMaterials.filter(
+                                (i) => i.status === "Low Stock",
+                            ).length
+                        }
                         icon={<AlertTriangle className="text-yellow-500" />}
                         color="yellow"
                     />
                     <StatCard
                         title="Out of Stock"
-                        value="03"
+                        value={
+                            filteredMaterials.filter(
+                                (i) => i.status === "Out of Stock",
+                            ).length
+                        }
                         icon={<AlertTriangle className="text-red-500" />}
                         color="red"
                     />
                 </div>
 
-                {/* Search and Filter */}
-                <div className="bg-[#0F1219]/80 border border-white/5 rounded-[2rem] p-4 mb-6 backdrop-blur-xl flex flex-col md:flex-row gap-4">
-                    <div className="relative flex-1">
-                        <Search
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500"
-                            size={18}
-                        />
-                        <input
-                            type="text"
-                            placeholder="Search by name, code or category..."
-                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-blue-500/50 transition-all"
-                        />
-                    </div>
-                    <button className="bg-white/5 border border-white/10 text-slate-400 px-6 py-3 rounded-xl flex items-center gap-2 hover:text-white transition-all">
-                        <Filter size={18} /> Filter
-                    </button>
-                </div>
-
                 {/* Materials Table */}
-                <div className="bg-[#0F1219]/80 border border-white/5 rounded-[2.5rem] overflow-hidden backdrop-blur-xl shadow-2xl">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="bg-[#0F1219]/80 border border-white/5 rounded-[2.5rem] overflow-hidden backdrop-blur-xl shadow-2xl"
+                >
                     <div className="overflow-x-auto">
                         <table className="w-full text-left">
                             <thead className="bg-white/5 text-slate-500 text-[10px] uppercase font-black tracking-widest">
                                 <tr>
-                                    <th className="px-6 py-5">Item Details</th>
-                                    <th className="px-6 py-5">Category</th>
-                                    <th className="px-6 py-5">Stock Level</th>
-                                    <th className="px-6 py-5">Unit Price</th>
-                                    <th className="px-6 py-5">Location</th>
-                                    <th className="px-6 py-5">Status</th>
-                                    <th className="px-6 py-5 text-right">
+                                    <th className="px-8 py-6">Item Details</th>
+                                    <th className="px-6 py-6">Category</th>
+                                    <th className="px-6 py-6">Stock Level</th>
+                                    <th className="px-6 py-6">Unit Price</th>
+                                    <th className="px-6 py-6">Location</th>
+                                    <th className="px-6 py-6">Status</th>
+                                    <th className="px-8 py-6 text-right">
                                         Action
                                     </th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {materials.map((item) => (
-                                    <tr
-                                        key={item.id}
-                                        className="group hover:bg-white/[0.02] transition-colors"
-                                    >
-                                        <td className="px-6 py-5">
-                                            <div className="flex flex-col">
-                                                <span className="text-white font-bold text-sm group-hover:text-blue-400 transition-colors">
-                                                    {item.name}
-                                                </span>
-                                                <span className="text-slate-500 text-[10px] font-black uppercase tracking-tighter">
-                                                    {item.code}
-                                                </span>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <span className="bg-white/5 text-slate-400 text-[10px] px-3 py-1 rounded-full font-bold uppercase">
-                                                {item.category}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <div className="flex flex-col">
-                                                <span className="text-white font-black">
-                                                    {item.stock}{" "}
-                                                    <small className="text-slate-500">
-                                                        {item.unit}
-                                                    </small>
-                                                </span>
-                                                <div className="w-24 h-1 bg-white/5 rounded-full mt-2 overflow-hidden">
-                                                    <div
-                                                        className={`h-full rounded-full ${item.stock < 10 ? "bg-red-500" : item.stock < 50 ? "bg-yellow-500" : "bg-green-500"}`}
-                                                        style={{
-                                                            width: `${Math.min((item.stock / 1000) * 100, 100)}%`,
-                                                        }}
-                                                    ></div>
+                                {filteredMaterials.length > 0 ? (
+                                    filteredMaterials.map((item) => (
+                                        <tr
+                                            key={item.id}
+                                            className="group hover:bg-white/[0.02] transition-colors"
+                                        >
+                                            <td className="px-8 py-5">
+                                                <div className="flex flex-col">
+                                                    <span className="text-white font-bold text-sm group-hover:text-blue-400 transition-colors uppercase">
+                                                        {item.name}
+                                                    </span>
+                                                    <span className="text-slate-500 text-[10px] font-black uppercase tracking-tighter mt-0.5">
+                                                        {item.code}
+                                                    </span>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-6 py-5 text-white font-bold">
-                                            ${item.price}
-                                        </td>
-                                        <td className="px-6 py-5 text-slate-400 text-xs">
-                                            {item.location}
-                                        </td>
-                                        <td className="px-6 py-5">
-                                            <StatusBadge status={item.status} />
-                                        </td>
-                                        <td className="px-6 py-5 text-right">
-                                            <button className="text-slate-500 hover:text-white p-2 transition-colors">
-                                                <MoreVertical size={18} />
-                                            </button>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <span className="bg-white/5 border border-white/5 text-slate-400 text-[10px] px-3 py-1 rounded-lg font-bold uppercase tracking-wider">
+                                                    {item.category}
+                                                </span>
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <div className="flex flex-col">
+                                                    <span className="text-white font-black">
+                                                        {item.stock}{" "}
+                                                        <small className="text-slate-500">
+                                                            {item.unit}
+                                                        </small>
+                                                    </span>
+                                                    <div className="w-24 h-1.5 bg-white/5 rounded-full mt-2.5 overflow-hidden">
+                                                        <div
+                                                            className={`h-full rounded-full transition-all duration-500 ${item.status === "Out of Stock" ? "bg-red-500" : item.status === "Low Stock" ? "bg-yellow-500" : "bg-green-500"}`}
+                                                            style={{
+                                                                width: `${item.stock > 0 ? Math.min((item.stock / 1000) * 100, 100) : 100}%`,
+                                                            }}
+                                                        ></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-5 text-white font-bold">
+                                                ${item.price.toFixed(2)}
+                                            </td>
+                                            <td className="px-6 py-5 text-slate-400 text-xs font-medium">
+                                                {item.location}
+                                            </td>
+                                            <td className="px-6 py-5">
+                                                <StatusBadge
+                                                    status={item.status}
+                                                />
+                                            </td>
+                                            <td className="px-8 py-5 text-right">
+                                                <button className="text-slate-500 hover:text-white p-2 hover:bg-white/5 rounded-xl transition-all">
+                                                    <MoreVertical size={18} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="7"
+                                            className="px-8 py-20 text-center text-slate-500 font-bold uppercase tracking-widest"
+                                        >
+                                            No materials found matching "
+                                            {searchTerm}"
                                         </td>
                                     </tr>
-                                ))}
+                                )}
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </InventoryLayout>
     );
@@ -213,39 +240,41 @@ function Materials() {
 // সাব-কম্পোনেন্ট: স্ট্যাট কার্ড
 function StatCard({ title, value, icon, color }) {
     const colors = {
-        blue: "border-blue-500/20 bg-blue-500/5",
-        yellow: "border-yellow-500/20 bg-yellow-500/5",
-        red: "border-red-500/20 bg-red-500/5",
+        blue: "border-blue-500/20 bg-blue-500/5 shadow-blue-500/5",
+        yellow: "border-yellow-500/20 bg-yellow-500/5 shadow-yellow-500/5",
+        red: "border-red-500/20 bg-red-500/5 shadow-red-500/5",
     };
     return (
-        <div
-            className={`p-6 rounded-[2rem] border ${colors[color]} backdrop-blur-xl`}
+        <motion.div
+            whileHover={{ y: -5 }}
+            className={`p-6 rounded-[2.5rem] border ${colors[color]} backdrop-blur-xl shadow-xl transition-all`}
         >
             <div className="flex justify-between items-start">
                 <div>
-                    <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">
+                    <p className="text-slate-500 text-[10px] font-black uppercase tracking-[0.2em]">
                         {title}
                     </p>
-                    <h3 className="text-3xl font-black text-white mt-2">
+                    <h3 className="text-3xl font-black text-white mt-3 tracking-tight">
                         {value}
                     </h3>
                 </div>
-                <div className="p-3 bg-white/5 rounded-2xl">{icon}</div>
+                <div className="p-4 bg-white/5 rounded-[1.5rem] border border-white/5">
+                    {icon}
+                </div>
             </div>
-        </div>
+        </motion.div>
     );
 }
 
-// সাব-কম্পোনেন্ট: স্ট্যাটাস ব্যাজ
 function StatusBadge({ status }) {
     const styles = {
-        "In Stock": "bg-green-500/10 text-green-500",
-        "Low Stock": "bg-yellow-500/10 text-yellow-500",
-        "Out of Stock": "bg-red-500/10 text-red-500",
+        "In Stock": "bg-green-500/10 text-green-500 border-green-500/20",
+        "Low Stock": "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+        "Out of Stock": "bg-red-500/10 text-red-500 border-red-500/20",
     };
     return (
         <span
-            className={`text-[10px] px-3 py-1 rounded-lg font-black uppercase tracking-tighter ${styles[status]}`}
+            className={`text-[9px] px-3 py-1.5 border rounded-lg font-black uppercase tracking-widest ${styles[status]}`}
         >
             {status}
         </span>

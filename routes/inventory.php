@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Inventory\StockInController;
 use App\Http\Controllers\Inventory\StockOutController;
 use App\Http\Controllers\Inventory\MatarialController;
+use App\Http\Controllers\Inventory\LowStockController;
+use App\Http\Controllers\Inventory\WasteController;
+use App\Http\Controllers\Inventory\SettingsController;
 
 Route::middleware(['auth'])->prefix('inventory-manager')->group(function () {
 
@@ -15,6 +18,7 @@ Route::middleware(['auth'])->prefix('inventory-manager')->group(function () {
     Route::post("/stock-in", [StockInController::class, 'store'])->name('inventory.stockIn.store');
     Route::get("/stock-out", [StockOutController::class, 'index'])->name('inventory.stock_out');
     Route::post('/stock-out/store', [StockOutController::class, 'store'])->name('inventory.stockOut.store');
-    // Route::get("/alerts", [InventoryController::class, 'alerts'])->name('inventory.alerts');
-    // Route::get("/waste", [InventoryController::class, 'waste'])->name('inventory.waste');
+    Route::get("/low-stock", [LowStockController::class, 'index'])->name('inventory.low_stock');
+    Route::get("/waste", [WasteController::class, 'index'])->name('inventory.waste');
+    Route::get("/settings", [SettingsController::class, 'index'])->name('inventory.settings');
 });

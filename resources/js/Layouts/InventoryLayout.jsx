@@ -58,7 +58,7 @@ export default function InventoryLayout({ children, header }) {
         },
         {
             name: "Low Stock Alerts",
-            href: "/inventory-manager/alerts",
+            href: "/inventory-manager/low-stock",
             icon: AlertTriangle,
         },
         {
@@ -212,10 +212,6 @@ export default function InventoryLayout({ children, header }) {
                     </div>
 
                     <div className="flex items-center gap-3 sm:gap-6">
-                        <button className="p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 hidden md:block hover:text-emerald-400">
-                            <Search size={20} />
-                        </button>
-
                         <div className="relative">
                             <button
                                 onClick={() =>
