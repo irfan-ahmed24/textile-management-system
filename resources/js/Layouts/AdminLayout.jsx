@@ -57,15 +57,27 @@ export default function AdminLayout({ children, header }) {
             name: "User Management",
             href: "/admin/user-management",
             icon: Users,
-        }, // আপডেট করা রাউট
-        { name: "Inventory Reports", href: "/admin/inventory", icon: Database },
-        { name: "Order Requests", href: "/admin/orders", icon: ShoppingCart },
+        },
+        {
+            name: "User Requests",
+            href: "/admin/user-requests",
+            icon: Users,
+        },
+        {
+            name: "Inventory Reports",
+            href: "/admin/Inventory_Report",
+            icon: Database,
+        },
+        {
+            name: "Order Requests",
+            href: "/admin/order-requests",
+            icon: ShoppingCart,
+        },
         {
             name: "Production Overview",
             href: "/admin/production",
             icon: Factory,
         },
-        { name: "Suppliers", href: "/admin/suppliers", icon: Truck },
         {
             name: "Financial Reports",
             href: "/admin/reports",
@@ -222,12 +234,6 @@ export default function AdminLayout({ children, header }) {
                                     />
                                 )}
                             </AnimatePresence>
-                            <button
-                                onClick={() => setIsSearchOpen(!isSearchOpen)}
-                                className="p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 hover:text-indigo-400 transition-colors"
-                            >
-                                <Search size={20} />
-                            </button>
                         </div>
 
                         <div className="relative">
