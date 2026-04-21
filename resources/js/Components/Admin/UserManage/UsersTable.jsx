@@ -1,8 +1,20 @@
 import React from "react";
 import { Edit2, Trash2, ShieldCheck, UserCircle } from "lucide-react";
+import { router } from "@inertiajs/react";
 
 function UsersTable({ users }) {
-    // ডাটা যদি এখনো না এসে থাকে (undefined বা null), তবে একটি লোডার বা খালি মেসেজ দেখাবে
+    const handleDelete = (userId) => {
+        if (confirm("Are you sure you want to delete this user?")) {
+            router.delete(route("admin.users.destroy", userId), {
+                onSuccess: () => {
+                    alert("User deleted successfully!");
+                },
+                onError: (err) => {
+                    console.error("Delete failed:", err);
+                },
+            });
+        }
+    };
     if (!users) {
         return (
             <div className="p-10 text-center text-slate-500 bg-[#080B11] border border-white/5 rounded-[2rem]">
@@ -76,7 +88,12 @@ function UsersTable({ users }) {
                                             <button className="p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors">
                                                 <Edit2 size={16} />
                                             </button>
-                                            <button className="p-2 hover:bg-red-500/10 rounded-lg text-slate-400 hover:text-red-500 transition-colors">
+                                            <button
+                                                onClick={() =>
+                                                    handleDelete(user.id)
+                                                }
+                                                className="p-2 hover:bg-red-500/10 rounded-lg text-slate-400 hover:text-red-500 transition-colors"
+                                            >
                                                 <Trash2 size={16} />
                                             </button>
                                         </div>

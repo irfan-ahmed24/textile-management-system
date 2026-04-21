@@ -38,28 +38,39 @@ export default function InventoryLayout({ children, header }) {
     const navigation = [
         {
             name: "Inv. Dashboard",
-            href: "/inventory/dashboard",
+            href: "/inventory-manager/dashboard",
             icon: LayoutDashboard,
         },
-        { name: "Raw Materials", href: "/inventory/materials", icon: Database },
+        {
+            name: "Raw Materials",
+            href: "/inventory-manager/materials",
+            icon: Database,
+        },
         {
             name: "Stock Entry (+)",
-            href: "/inventory/stock-in",
+            href: "/inventory-manager/stock-in",
             icon: PlusCircle,
         },
         {
             name: "Stock Dispatch (-)",
-            href: "/inventory/stock-out",
+            href: "/inventory-manager/stock-out",
             icon: MinusCircle,
         },
-        { name: "Suppliers", href: "/inventory/suppliers", icon: Truck },
         {
             name: "Low Stock Alerts",
-            href: "/inventory/alerts",
+            href: "/inventory-manager/low-stock",
             icon: AlertTriangle,
         },
-        { name: "Waste Management", href: "/inventory/waste", icon: Trash2 },
-        { name: "Settings", href: "/inventory/settings", icon: Settings },
+        {
+            name: "Waste Management",
+            href: "/inventory-manager/waste",
+            icon: Trash2,
+        },
+        {
+            name: "Settings",
+            href: "/inventory-manager/settings",
+            icon: Settings,
+        },
     ];
 
     const SidebarContent = (isMobile = false) => (
@@ -201,10 +212,6 @@ export default function InventoryLayout({ children, header }) {
                     </div>
 
                     <div className="flex items-center gap-3 sm:gap-6">
-                        <button className="p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 hidden md:block hover:text-emerald-400">
-                            <Search size={20} />
-                        </button>
-
                         <div className="relative">
                             <button
                                 onClick={() =>

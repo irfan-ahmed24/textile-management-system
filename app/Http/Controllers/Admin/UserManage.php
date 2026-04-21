@@ -36,16 +36,21 @@ class UserManage extends Controller
         User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => Hash::make($request->password), // পাসওয়ার্ড এনক্রিপ্ট করা
+            'password' => Hash::make($request->password),
             'role' => $request->role,
-            'status' => 'Active', // ডিফল্ট স্ট্যাটাস Active রাখা হলো
+            'status' => 'Active',
             'company_name' => $request->company_name,
             'phone' => $request->phone,
             'website' => $request->website,
             'address' => $request->address,
         ]);
-
-        // ৩. মেসেজ সহ আগের পেজে পাঠানো (Inertia standard)
         return Redirect::back()->with('success', 'User created successfully!');
+    }
+    public function destroy($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return Redirect::back()->with('success', 'User deleted successfully!');
     }
 }
