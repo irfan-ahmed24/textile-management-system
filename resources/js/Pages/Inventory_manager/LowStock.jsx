@@ -1,6 +1,6 @@
 import React from "react";
 import InventoryLayout from "@/Layouts/InventoryLayout";
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import {
     AlertCircle,
@@ -11,43 +11,9 @@ import {
     History,
 } from "lucide-react";
 
-function LowStock() {
-    // ডামি ডাটা
-    const lowStockItems = [
-        {
-            id: 1,
-            name: "Polyester Fabric",
-            code: "FAB-202",
-            current_stock: 8,
-            min_level: 20,
-            unit: "Yards",
-            category: "Fabric",
-            last_out: "2 hours ago",
-        },
-        {
-            id: 2,
-            name: "Reactive Dye Blue",
-            code: "CHM-505",
-            current_stock: 2,
-            min_level: 15,
-            unit: "KG",
-            category: "Chemical",
-            last_out: "Yesterday",
-        },
-        {
-            id: 3,
-            name: "Cotton Yarn 40s",
-            code: "YRN-088",
-            current_stock: 15,
-            min_level: 50,
-            unit: "KG",
-            category: "Yarn",
-            last_out: "5 hours ago",
-        },
-    ];
-
+function LowStock({ dbLowStockItems = [], recentRestock = [] }) {
     return (
-        <InventoryLayout>
+        <InventoryLayout header="Inventory Alerts">
             <Head title="Low Stock Alerts | TextileMS" />
 
             <div className="p-6 max-w-[1600px] mx-auto">
@@ -65,8 +31,8 @@ function LowStock() {
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Items List */}
                     <div className="lg:col-span-3 space-y-4">
-                        {lowStockItems.length > 0 ? (
-                            lowStockItems.map((item, index) => (
+                        {dbLowStockItems.length > 0 ? (
+                            dbLowStockItems.map((item, index) => (
                                 <motion.div
                                     key={item.id}
                                     initial={{ opacity: 0, x: -20 }}
@@ -83,7 +49,7 @@ function LowStock() {
                                                 />
                                             </div>
                                             <div>
-                                                <h3 className="text-white font-black text-lg">
+                                                <h3 className="text-white font-black text-lg uppercase">
                                                     {item.name}
                                                 </h3>
                                                 <div className="flex gap-3 mt-1">
@@ -101,91 +67,108 @@ function LowStock() {
                                         <div className="flex-1 w-full max-w-xs text-center md:text-left">
                                             <div className="flex justify-between mb-2">
                                                 <span className="text-slate-500 text-[10px] font-bold uppercase tracking-widest">
-                                                    Stock Level
+                                                    Current Stock
                                                 </span>
                                                 <span className="text-amber-500 text-[10px] font-bold uppercase tracking-widest">
                                                     {item.current_stock} /{" "}
                                                     {item.min_level} {item.unit}
                                                 </span>
                                             </div>
-                                            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                                                <div
-                                                    className="h-full bg-amber-500 rounded-full"
-                                                    style={{
-                                                        width: `${(item.current_stock / item.min_level) * 100}%`,
+                                            <div className="w-full h-2 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                                <motion.div
+                                                    initial={{ width: 0 }}
+                                                    animate={{
+                                                        width: `${Math.min((item.current_stock / item.min_level) * 100, 100)}%`,
                                                     }}
-                                                ></div>
+                                                    className="h-full bg-amber-500 rounded-full"
+                                                />
                                             </div>
                                         </div>
 
                                         <div className="flex items-center gap-4">
                                             <div className="text-right hidden md:block">
                                                 <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest">
-                                                    Last Out
+                                                    Last Movement
                                                 </p>
-                                                <p className="text-white text-xs font-bold">
+                                                <p className="text-white text-xs font-bold italic">
                                                     {item.last_out}
                                                 </p>
                                             </div>
-                                            <button className="bg-white/5 hover:bg-white/10 text-white p-4 rounded-2xl transition-all border border-white/5">
+                                            {/* সরাসরি স্টক ইন পেজে যাওয়ার জন্য বাটন */}
+                                            <Link
+                                                href={route(
+                                                    "inventory.stockIn",
+                                                )}
+                                                className="bg-white/5 hover:bg-amber-500 hover:text-black text-white p-4 rounded-2xl transition-all border border-white/5 shadow-lg active:scale-90"
+                                            >
                                                 <ArrowRight size={20} />
-                                            </button>
+                                            </Link>
                                         </div>
                                     </div>
                                 </motion.div>
                             ))
                         ) : (
-                            <div className="text-center py-20 bg-[#0F1219]/50 border border-dashed border-white/10 rounded-[3rem]">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-center py-20 bg-[#0F1219]/50 border border-dashed border-white/10 rounded-[3rem]"
+                            >
                                 <RefreshCcw
-                                    className="mx-auto text-slate-700 mb-4"
+                                    className="mx-auto text-slate-700 mb-4 animate-spin-slow"
                                     size={48}
                                 />
                                 <p className="text-slate-500 font-bold uppercase tracking-widest">
                                     All items are sufficiently stocked!
                                 </p>
-                            </div>
+                            </motion.div>
                         )}
                     </div>
 
                     {/* Sidebar Stats */}
                     <div className="space-y-6">
-                        <div className="bg-amber-500/5 border border-amber-500/20 rounded-[2.5rem] p-8">
+                        <div className="bg-amber-500/5 border border-amber-500/20 rounded-[2.5rem] p-8 shadow-xl">
                             <TrendingDown
                                 className="text-amber-500 mb-4"
                                 size={32}
                             />
-                            <h4 className="text-white font-black text-xl mb-2">
+                            <h4 className="text-white font-black text-xl mb-2 uppercase tracking-tighter">
                                 Status Report
                             </h4>
                             <p className="text-slate-400 text-xs leading-relaxed">
-                                These items require immediate attention. Low
-                                stock levels may interrupt the ongoing
-                                production process.
+                                You have{" "}
+                                <span className="text-amber-500 font-bold">
+                                    {dbLowStockItems.length} items
+                                </span>{" "}
+                                that require immediate attention. Replenish
+                                stock to avoid production delays.
                             </p>
                         </div>
 
-                        <div className="bg-[#0F1219]/80 border border-white/5 rounded-[2.5rem] p-8">
+                        <div className="bg-[#0F1219]/80 border border-white/5 rounded-[2.5rem] p-8 shadow-2xl">
                             <h4 className="text-white font-black uppercase text-xs tracking-[0.2em] mb-6 flex items-center gap-2">
                                 <History size={16} className="text-blue-500" />{" "}
                                 Recent Restock
                             </h4>
                             <div className="space-y-4">
-                                <div className="border-l-2 border-blue-500/30 pl-4 py-1">
-                                    <p className="text-white text-xs font-bold">
-                                        White Yarn 20s
+                                {recentRestock.length > 0 ? (
+                                    recentRestock.map((log, i) => (
+                                        <div
+                                            key={i}
+                                            className="border-l-2 border-blue-500/30 pl-4 py-1"
+                                        >
+                                            <p className="text-white text-xs font-bold uppercase truncate">
+                                                {log.name}
+                                            </p>
+                                            <p className="text-blue-500 text-[10px] font-black uppercase mt-1">
+                                                {log.qty_added}
+                                            </p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <p className="text-slate-600 text-[10px] font-bold uppercase">
+                                        No recent activity
                                     </p>
-                                    <p className="text-slate-500 text-[10px]">
-                                        +500 KG Added
-                                    </p>
-                                </div>
-                                <div className="border-l-2 border-green-500/30 pl-4 py-1">
-                                    <p className="text-white text-xs font-bold">
-                                        Acid Dye Green
-                                    </p>
-                                    <p className="text-slate-500 text-[10px]">
-                                        +50 KG Added
-                                    </p>
-                                </div>
+                                )}
                             </div>
                         </div>
                     </div>

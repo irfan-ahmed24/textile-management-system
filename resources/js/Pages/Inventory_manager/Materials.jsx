@@ -2,78 +2,23 @@ import React, { useState, useEffect } from "react";
 import InventoryLayout from "@/Layouts/InventoryLayout";
 import { Head } from "@inertiajs/react";
 import { motion } from "framer-motion";
-import {
-    Search,
-    Filter,
-    MoreVertical,
-    Package,
-    AlertTriangle,
-    Download,
-} from "lucide-react";
+import { Search, Package, AlertTriangle, MoreVertical } from "lucide-react";
 
-function Materials() {
-    // অরিজিনাল ডাটা
-    const initialMaterials = [
-        {
-            id: 1,
-            name: "Cotton Yarn 30s",
-            code: "YRN-001",
-            category: "Yarn",
-            stock: 450,
-            unit: "KG",
-            price: 3.5,
-            location: "Floor 1, Sec A",
-            status: "In Stock",
-        },
-        {
-            id: 2,
-            name: "Polyester Fabric",
-            code: "FAB-202",
-            category: "Fabric",
-            stock: 8,
-            unit: "Yards",
-            price: 12.0,
-            location: "Floor 2, Sec B",
-            status: "Low Stock",
-        },
-        {
-            id: 3,
-            name: "Reactive Dye Blue",
-            code: "CHM-505",
-            category: "Chemical",
-            stock: 0,
-            unit: "KG",
-            price: 8.2,
-            location: "Chemical Lab",
-            status: "Out of Stock",
-        },
-        {
-            id: 4,
-            name: "Sewing Thread Red",
-            code: "ACC-101",
-            category: "Accessories",
-            stock: 1200,
-            unit: "PCS",
-            price: 0.5,
-            location: "Floor 1, Sec C",
-            status: "In Stock",
-        },
-    ];
-
+// dbMaterials প্রপস হিসেবে কন্ট্রোলার থেকে আসছে
+function Materials({ dbMaterials }) {
     const [searchTerm, setSearchTerm] = useState("");
-    const [filteredMaterials, setFilteredMaterials] =
-        useState(initialMaterials);
+    const [filteredMaterials, setFilteredMaterials] = useState(dbMaterials);
 
-    // সার্চ লজিক
+    // সার্চ লজিক (রিয়েল ডাটাবেস ডাটার ওপর ফিল্টার করবে)
     useEffect(() => {
-        const results = initialMaterials.filter(
+        const results = dbMaterials.filter(
             (item) =>
                 item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 item.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 item.category.toLowerCase().includes(searchTerm.toLowerCase()),
         );
         setFilteredMaterials(results);
-    }, [searchTerm]);
+    }, [searchTerm, dbMaterials]);
 
     return (
         <InventoryLayout>
@@ -92,7 +37,7 @@ function Materials() {
                         </p>
                     </div>
 
-                    {/* Search Bar in Header Area */}
+                    {/* Search Bar */}
                     <div className="relative w-full md:w-96 group">
                         <Search
                             className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-blue-500 transition-colors"
@@ -108,7 +53,7 @@ function Materials() {
                     </div>
                 </div>
 
-                {/* Quick Stats Cards */}
+                {/* Quick Stats Cards (ডাইনামিক ক্যালকুলেশন) */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <StatCard
                         title="Total Items"
@@ -193,7 +138,7 @@ function Materials() {
                                                         <div
                                                             className={`h-full rounded-full transition-all duration-500 ${item.status === "Out of Stock" ? "bg-red-500" : item.status === "Low Stock" ? "bg-yellow-500" : "bg-green-500"}`}
                                                             style={{
-                                                                width: `${item.stock > 0 ? Math.min((item.stock / 1000) * 100, 100) : 100}%`,
+                                                                width: `${Math.min((item.stock / 1000) * 100, 100)}%`,
                                                             }}
                                                         ></div>
                                                     </div>
@@ -202,7 +147,7 @@ function Materials() {
                                             <td className="px-6 py-5 text-white font-bold">
                                                 ${item.price.toFixed(2)}
                                             </td>
-                                            <td className="px-6 py-5 text-slate-400 text-xs font-medium">
+                                            <td className="px-6 py-5 text-slate-400 text-xs font-medium italic">
                                                 {item.location}
                                             </td>
                                             <td className="px-6 py-5">
@@ -237,7 +182,7 @@ function Materials() {
     );
 }
 
-// সাব-কম্পোনেন্ট: স্ট্যাট কার্ড
+// সাব-কম্পোনেন্টগুলো (StatCard, StatusBadge) আপনার আগের কোডের মতোই থাকবে।
 function StatCard({ title, value, icon, color }) {
     const colors = {
         blue: "border-blue-500/20 bg-blue-500/5 shadow-blue-500/5",

@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Inventory\DashboardController;
 use App\Http\Controllers\Inventory\StockInController;
 use App\Http\Controllers\Inventory\StockOutController;
 use App\Http\Controllers\Inventory\MatarialController;
@@ -10,9 +11,7 @@ use App\Http\Controllers\Inventory\SettingsController;
 
 Route::middleware(['auth'])->prefix('inventory-manager')->group(function () {
 
-    Route::get('/dashboard', function () {
-        return inertia('Inventory_manager/Dashboard');
-    })->name('inventory.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('inventory.dashboard');
     Route::get("/materials", [MatarialController::class, 'index'])->name('inventory.materials');
     Route::get("/stock-in", [StockInController::class, 'index'])->name('inventory.stock_in');
     Route::post("/stock-in", [StockInController::class, 'store'])->name('inventory.stockIn.store');

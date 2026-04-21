@@ -5,11 +5,7 @@ import StockOutHeader from "@/Components/Inventory_manager/Stock_Out/StockOutHea
 import StockOutScannerModal from "@/Components/Inventory_manager/Stock_Out/StockOutScannerModal";
 import StockOutForm from "@/Components/Inventory_manager/Stock_Out/StockOutForm";
 import PrecautionCard from "@/Components/Inventory_manager/Stock_Out/PrecautionCard";
-import InventoryStatusCard from "@/Components/Inventory_manager/Stock_Out/InventoryStatusCard";
-import {
-    stockOutReasons,
-    inventoryStatusItems,
-} from "@/Components/Inventory_manager/Stock_Out/stockOutData";
+import { stockOutReasons } from "@/Components/Inventory_manager/Stock_Out/stockOutData";
 
 // Toast ইমপোর্ট
 import toast, { Toaster } from "react-hot-toast";
@@ -101,7 +97,7 @@ function Stock_Out() {
 
                     <div className="space-y-6">
                         <PrecautionCard />
-                        <InventoryStatusCard items={inventoryStatusItems} />
+                        {/* <InventoryStatusCard items={inventoryStatusItems} /> */}
                     </div>
                 </div>
             </div>

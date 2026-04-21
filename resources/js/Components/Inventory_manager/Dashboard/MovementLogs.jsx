@@ -14,9 +14,6 @@ export default function MovementLogs({ logs }) {
                         সবশেষ ইনভেন্টরি ট্রানজ্যাকশনগুলো এখানে দেখুন।
                     </p>
                 </div>
-                <button className="bg-white/5 text-emerald-500 px-4 py-2 rounded-xl text-xs font-bold hover:bg-emerald-500/10 transition-all border border-emerald-500/20">
-                    New Stock Entry
-                </button>
             </div>
 
             <div className="overflow-x-auto">
