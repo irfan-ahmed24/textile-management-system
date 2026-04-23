@@ -151,7 +151,6 @@ function UserRequest() {
     );
 }
 
-// সাব-কম্পোনেন্ট: ডিটেইলস আইটেম
 function DetailItem({ icon, label, value }) {
     return (
         <div className="flex items-start gap-3 border-b border-white/[0.03] pb-3 last:border-0 last:pb-0">

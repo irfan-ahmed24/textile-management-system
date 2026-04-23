@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 
 export default function BuyerLayout({ children, header }) {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
@@ -49,7 +49,7 @@ export default function BuyerLayout({ children, header }) {
     const navigation = [
         { name: "Dashboard", href: "/buyer/dashboard", icon: LayoutDashboard },
         { name: "My Orders", href: "/buyer/orders", icon: ShoppingBag },
-        { name: "Track Order", href: "/buyer/track", icon: MapPin },
+        { name: "Track Order", href: "/buyer/track-order", icon: MapPin },
         { name: "Payment", href: "/buyer/payments", icon: CreditCard },
         { name: "Invoices", href: "/buyer/invoices", icon: FileText },
         { name: "Profile", href: "/profile/edit", icon: User },
