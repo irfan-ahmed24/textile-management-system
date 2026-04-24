@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import BuyerLayout from "@/Layouts/BuyerLayout";
-import { Head } from "@inertiajs/react";
+import { Head, useForm, Link, router } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Search,
@@ -12,20 +12,46 @@ import {
     Ruler,
     AlertTriangle,
     Layers,
-    Type, // Fabric টাইপ বোঝাতে আইকন
+    CreditCard,
+    Trash2,
+    CheckCircle,
 } from "lucide-react";
-// ডাটা ইমপোর্ট
-import { runningOrders } from "@/Data/AllOrder";
 
-function MyOrder() {
+function MyOrder({ runningOrders = [] }) {
     const [searchTerm, setSearchTerm] = useState("");
     const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
-    // সার্চ ফিল্টার
+    // --- ডাটা হ্যান্ডলিং (Inertia Form) ---
+    const { data, setData, post, processing, reset, errors } = useForm({
+        product_name: "",
+        fabric_type: "Single Jersey (Cotton)",
+        total_quantity: "",
+        priority_level: "Standard Delivery",
+        target_delivery: "",
+        size_breakdown: { S: 0, M: 0, L: 0, XL: 0 },
+        special_instructions: "",
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        post(route("buyer.orders.store"), {
+            onSuccess: () => {
+                reset();
+                setIsOrderModalOpen(false);
+            },
+        });
+    };
+
+    const handleCancelOrder = (id) => {
+        if (confirm("Are you sure you want to cancel this order?")) {
+            router.delete(route("buyer.orders.destroy", id));
+        }
+    };
+
     const filteredOrders = runningOrders.filter(
         (order) =>
-            order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            order.product.toLowerCase().includes(searchTerm.toLowerCase()),
+            order.id.toString().includes(searchTerm) ||
+            order.product_name.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     return (
@@ -34,14 +60,14 @@ function MyOrder() {
 
             <div className="p-6 max-w-[1200px] mx-auto text-white">
                 {/* Header & Actions */}
-                <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
                     <div>
-                        <h1 className="text-xl font-black uppercase tracking-tight flex items-center gap-2">
+                        <h1 className="text-2xl font-black uppercase tracking-tight flex items-center gap-2">
                             <ShoppingBag className="text-indigo-500" /> Order
                             History
                         </h1>
-                        <p className="text-slate-500 text-[10px] font-bold uppercase mt-1">
-                            Manage and request garment production
+                        <p className="text-slate-500 text-[10px] font-bold uppercase mt-1 tracking-widest">
+                            Manage production requests & secure payments
                         </p>
                     </div>
 
@@ -53,76 +79,159 @@ function MyOrder() {
                             />
                             <input
                                 type="text"
-                                placeholder="Search Orders..."
+                                placeholder="Search by ID or Name..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full bg-[#161b22] border border-white/10 rounded-xl py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-indigo-500 transition-all"
+                                className="w-full bg-[#161b22] border border-white/10 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-indigo-500 transition-all font-medium"
                             />
                         </div>
                         <button
                             onClick={() => setIsOrderModalOpen(true)}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase px-6 py-3 rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/20 active:scale-95"
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-black uppercase px-6 py-3.5 rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/20 active:scale-95"
                         >
-                            <Plus size={16} /> New Order Request
+                            <Plus size={16} /> New Request
                         </button>
                     </div>
                 </div>
 
                 {/* Orders Table */}
-                <div className="bg-[#0F1219] border border-white/5 rounded-2xl overflow-hidden shadow-xl">
+                <div className="bg-[#0F1219] border border-white/5 rounded-[2rem] overflow-hidden shadow-2xl">
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-white/5 text-slate-500 text-[10px] uppercase font-black tracking-widest">
-                                <th className="px-6 py-4">Order Details</th>
-                                <th className="px-6 py-4">Placement Date</th>
-                                <th className="px-6 py-4">Quantity</th>
-                                <th className="px-6 py-4">Amount</th>
-                                <th className="px-6 py-4 text-right">Status</th>
+                                <th className="px-8 py-5">Order Details</th>
+                                <th className="px-6 py-5 text-center">
+                                    Payment Status
+                                </th>
+                                <th className="px-6 py-5 text-center">
+                                    Production Status
+                                </th>
+                                <th className="px-6 py-5">Total Payable</th>
+                                <th className="px-8 py-5 text-right">
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
-                            {filteredOrders.map((order) => (
-                                <tr
-                                    key={order.id}
-                                    className="hover:bg-white/[0.02] transition-colors"
-                                >
-                                    <td className="px-6 py-4 leading-tight">
-                                        <span className="text-sm font-black uppercase text-white block">
-                                            {order.product}
-                                        </span>
-                                        <span className="text-[9px] font-bold text-slate-500 uppercase">
-                                            ID: #ORD-{order.id}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 text-xs font-bold text-slate-400">
-                                        {order.lastUpdate || "23 Apr, 2026"}
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-bold text-slate-300">
-                                        {order.total_qty} Pcs
-                                    </td>
-                                    <td className="px-6 py-4 text-sm font-black text-indigo-400">
-                                        {order.amount || "$0.00"}
-                                    </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <span
-                                            className={`text-[9px] px-3 py-1 rounded-full font-black uppercase border ${
-                                                order.currentStageId >= 5
-                                                    ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/5"
-                                                    : "text-amber-500 border-amber-500/20 bg-amber-500/5"
-                                            }`}
-                                        >
-                                            {order.currentStageId >= 5
-                                                ? "Completed"
-                                                : "In Production"}
-                                        </span>
+                            {filteredOrders.length > 0 ? (
+                                filteredOrders.map((order) => (
+                                    <tr
+                                        key={order.id}
+                                        className="hover:bg-white/[0.02] transition-colors group"
+                                    >
+                                        <td className="px-8 py-6">
+                                            <span className="text-[11px] font-black text-indigo-500 uppercase tracking-widest block mb-1">
+                                                #ORD-{order.id}
+                                            </span>
+                                            <span className="text-sm font-black uppercase text-white block">
+                                                {order.product_name}
+                                            </span>
+                                            <span className="text-[9px] font-bold text-slate-500 uppercase">
+                                                Qty: {order.total_quantity} Pcs
+                                            </span>
+                                        </td>
+
+                                        <td className="px-6 py-6 text-center">
+                                            <span
+                                                className={`text-[9px] px-3 py-1.5 rounded-full font-black uppercase border ${
+                                                    order.payment_status ===
+                                                    "paid"
+                                                        ? "text-emerald-500 border-emerald-500/20 bg-emerald-500/5"
+                                                        : "text-amber-500 border-amber-500/20 bg-amber-500/5"
+                                                }`}
+                                            >
+                                                {order.payment_status}
+                                            </span>
+                                        </td>
+
+                                        <td className="px-6 py-6 text-center">
+                                            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                                                {order.status}
+                                            </span>
+                                        </td>
+
+                                        <td className="px-6 py-6">
+                                            {order.total_amount > 0 ? (
+                                                <div>
+                                                    <span className="text-sm font-black text-white block">
+                                                        ${order.total_amount}
+                                                    </span>
+                                                    <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">
+                                                        Authorized Quote
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-[9px] font-bold text-slate-600 uppercase italic tracking-widest">
+                                                    Awaiting Quote
+                                                </span>
+                                            )}
+                                        </td>
+
+                                        <td className="px-8 py-6 text-right">
+                                            <div className="flex justify-end items-center gap-3">
+                                                {/* পেমেন্ট না হওয়া পর্যন্ত ক্যানসেল বাটন থাকবে */}
+                                                {order.payment_status !==
+                                                    "paid" && (
+                                                    <button
+                                                        onClick={() =>
+                                                            handleCancelOrder(
+                                                                order.id,
+                                                            )
+                                                        }
+                                                        className="text-slate-600 hover:text-red-500 transition-all p-2 bg-white/5 rounded-lg border border-white/5"
+                                                        title="Cancel Order"
+                                                    >
+                                                        <Trash2 size={14} />
+                                                    </button>
+                                                )}
+
+                                                {/* পেমেন্ট স্ট্যাটাস অনুযায়ী বাটন লজিক */}
+                                                {order.payment_status ===
+                                                "paid" ? (
+                                                    <div className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase">
+                                                        <CheckCircle
+                                                            size={14}
+                                                        />{" "}
+                                                        Paid & Locked
+                                                    </div>
+                                                ) : order.total_amount > 0 ? (
+                                                    <Link
+                                                        href={route(
+                                                            "buyer.payment",
+                                                            {
+                                                                order_id:
+                                                                    order.id,
+                                                            },
+                                                        )}
+                                                        className="bg-indigo-600 hover:bg-indigo-700 text-white text-[9px] font-black uppercase px-5 py-2.5 rounded-xl transition-all flex items-center gap-2 shadow-lg shadow-indigo-600/20 active:scale-95"
+                                                    >
+                                                        <CreditCard size={14} />{" "}
+                                                        Pay Now
+                                                    </Link>
+                                                ) : (
+                                                    <span className="text-[9px] font-black text-slate-700 uppercase italic">
+                                                        Awaiting Price
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td
+                                        colSpan="5"
+                                        className="text-center py-20 text-slate-600 font-bold uppercase text-[10px] tracking-[0.2em]"
+                                    >
+                                        No active orders found
                                     </td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>
 
-                {/* --- NEW ORDER MODAL --- */}
+                {/* --- NEW ORDER REQUEST MODAL --- */}
                 <AnimatePresence>
                     {isOrderModalOpen && (
                         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
@@ -162,8 +271,10 @@ function MyOrder() {
                                     </button>
                                 </div>
 
-                                <form className="space-y-6">
-                                    {/* Row 1: Product Name & Fabric Type (Updated) */}
+                                <form
+                                    onSubmit={handleSubmit}
+                                    className="space-y-6"
+                                >
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-500 uppercase ml-1">
@@ -171,38 +282,54 @@ function MyOrder() {
                                             </label>
                                             <input
                                                 type="text"
+                                                required
+                                                value={data.product_name}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "product_name",
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 placeholder="e.g. Slim Fit Denim"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-bold"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-bold"
                                             />
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-500 uppercase ml-1 flex items-center gap-1">
                                                 <Layers size={12} /> Fabric Type
                                             </label>
-                                            <select className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-bold appearance-none cursor-pointer">
-                                                <option className="bg-[#0F1219]">
+                                            <select
+                                                value={data.fabric_type}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "fabric_type",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-bold appearance-none cursor-pointer"
+                                            >
+                                                <option
+                                                    className="bg-[#0F1219]"
+                                                    value="Single Jersey (Cotton)"
+                                                >
                                                     Single Jersey (Cotton)
                                                 </option>
-                                                <option className="bg-[#0F1219]">
+                                                <option
+                                                    className="bg-[#0F1219]"
+                                                    value="Denim (12oz/14oz)"
+                                                >
                                                     Denim (12oz/14oz)
                                                 </option>
-                                                <option className="bg-[#0F1219]">
+                                                <option
+                                                    className="bg-[#0F1219]"
+                                                    value="Pique Polo Fabric"
+                                                >
                                                     Pique Polo Fabric
-                                                </option>
-                                                <option className="bg-[#0F1219]">
-                                                    Fleece (Winter)
-                                                </option>
-                                                <option className="bg-[#0F1219]">
-                                                    Twill Fabric
-                                                </option>
-                                                <option className="bg-[#0F1219]">
-                                                    Polyester / Mesh
                                                 </option>
                                             </select>
                                         </div>
                                     </div>
 
-                                    {/* Row 2: Quantity & Priority */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-500 uppercase ml-1">
@@ -210,30 +337,49 @@ function MyOrder() {
                                             </label>
                                             <input
                                                 type="number"
+                                                required
+                                                value={data.total_quantity}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "total_quantity",
+                                                        e.target.value,
+                                                    )
+                                                }
                                                 placeholder="1000"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-bold"
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-bold"
                                             />
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-500 uppercase ml-1 flex items-center gap-1">
                                                 <AlertTriangle size={12} />{" "}
-                                                Priority Level
+                                                Priority
                                             </label>
-                                            <select className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-bold appearance-none cursor-pointer">
-                                                <option className="bg-[#0F1219]">
+                                            <select
+                                                value={data.priority_level}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "priority_level",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-bold appearance-none cursor-pointer"
+                                            >
+                                                <option
+                                                    className="bg-[#0F1219]"
+                                                    value="Standard Delivery"
+                                                >
                                                     Standard Delivery
                                                 </option>
-                                                <option className="bg-[#0F1219]">
-                                                    Medium Priority
-                                                </option>
-                                                <option className="bg-[#0F1219]">
+                                                <option
+                                                    className="bg-[#0F1219]"
+                                                    value="Urgent"
+                                                >
                                                     Urgent / High Priority
                                                 </option>
                                             </select>
                                         </div>
                                     </div>
 
-                                    {/* Row 3: Target Date & Size Breakdown */}
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-500 uppercase ml-1 flex items-center gap-1">
@@ -242,52 +388,74 @@ function MyOrder() {
                                             </label>
                                             <input
                                                 type="date"
-                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-bold"
+                                                required
+                                                value={data.target_delivery}
+                                                onChange={(e) =>
+                                                    setData(
+                                                        "target_delivery",
+                                                        e.target.value,
+                                                    )
+                                                }
+                                                className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-bold [color-scheme:dark]"
                                             />
                                         </div>
                                         <div className="space-y-2">
                                             <label className="text-[10px] font-black text-slate-500 uppercase ml-1 flex items-center gap-1">
-                                                <Ruler size={12} /> Size
-                                                Breakdown
+                                                <Ruler size={12} /> Sizes
+                                                (S,M,L,XL)
                                             </label>
                                             <div className="grid grid-cols-4 gap-2">
                                                 {["S", "M", "L", "XL"].map(
                                                     (size) => (
-                                                        <div
+                                                        <input
                                                             key={size}
-                                                            className="relative"
-                                                        >
-                                                            <span className="absolute left-2 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-600">
-                                                                {size}
-                                                            </span>
-                                                            <input
-                                                                type="number"
-                                                                placeholder="0"
-                                                                className="w-full bg-white/5 border border-white/10 rounded-lg py-2 pl-6 pr-1 text-white focus:outline-none focus:border-indigo-500 text-[10px] font-bold"
-                                                            />
-                                                        </div>
+                                                            type="number"
+                                                            placeholder={size}
+                                                            onChange={(e) =>
+                                                                setData(
+                                                                    "size_breakdown",
+                                                                    {
+                                                                        ...data.size_breakdown,
+                                                                        [size]: e
+                                                                            .target
+                                                                            .value,
+                                                                    },
+                                                                )
+                                                            }
+                                                            className="w-full bg-white/5 border border-white/10 rounded-lg py-2 text-center text-white focus:outline-none focus:border-indigo-500 text-[10px] font-bold"
+                                                        />
                                                     ),
                                                 )}
                                             </div>
                                         </div>
                                     </div>
 
-                                    {/* Row 4: Fabric & Instructions */}
                                     <div className="space-y-2">
                                         <label className="text-[10px] font-black text-slate-500 uppercase ml-1">
-                                            Special Production Instructions
+                                            Special Instructions
                                         </label>
                                         <textarea
-                                            placeholder="Write about fabric GSM, color shades, or wash requirements..."
-                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-medium h-24 resize-none"
-                                        ></textarea>
+                                            value={data.special_instructions}
+                                            onChange={(e) =>
+                                                setData(
+                                                    "special_instructions",
+                                                    e.target.value,
+                                                )
+                                            }
+                                            placeholder="Fabric GSM, color shades, or wash requirements..."
+                                            className="w-full bg-white/5 border border-white/10 rounded-xl py-3.5 px-4 text-white focus:outline-none focus:border-indigo-500 text-sm font-medium h-24 resize-none"
+                                        />
                                     </div>
 
                                     <button
-                                        type="button"
-                                        className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-indigo-600/20 transition-all uppercase text-[10px] tracking-widest flex items-center justify-center gap-2 active:scale-95"
+                                        type="submit"
+                                        disabled={processing}
+                                        className="w-full mt-4 bg-indigo-600 hover:bg-indigo-700 text-white font-black py-4 rounded-2xl shadow-xl shadow-indigo-600/20 transition-all uppercase text-[10px] tracking-[0.2em] flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
                                     >
-                                        <Send size={16} /> Submit Order Request
+                                        <Send size={16} />{" "}
+                                        {processing
+                                            ? "Submitting..."
+                                            : "Submit Order Request"}
                                     </button>
                                 </form>
                             </motion.div>

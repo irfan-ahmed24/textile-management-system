@@ -180,7 +180,7 @@ export default function ProductionLayout({ children, header }) {
             {/* Desktop Sidebar */}
             <motion.aside
                 animate={{ width: isSidebarOpen ? "288px" : "80px" }}
-                className="hidden lg:flex fixed inset-y-0 left-0 z-[70] bg-[#080B11] border-r border-white/5 flex-col transition-all duration-300"
+                className="hidden lg:flex fixed inset-y-0 left-0 z-[30] bg-[#080B11] border-r border-white/5 flex-col transition-all duration-300"
             >
                 {SidebarContent(false)}
             </motion.aside>

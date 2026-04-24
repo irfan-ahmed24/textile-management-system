@@ -52,7 +52,7 @@ export default function BuyerLayout({ children, header }) {
         { name: "Track Order", href: "/buyer/track-order", icon: MapPin },
         { name: "Payment", href: "/buyer/payments", icon: CreditCard },
         { name: "Invoices", href: "/buyer/invoices", icon: FileText },
-        { name: "Profile", href: "/profile/edit", icon: User },
+        { name: "Profile", href: "/buyer/profile", icon: User },
     ];
 
     return (

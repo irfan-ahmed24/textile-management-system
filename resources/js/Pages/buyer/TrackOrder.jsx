@@ -1,28 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import BuyerLayout from "@/Layouts/BuyerLayout";
 import { Head } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     Search,
-    MapPin,
     CheckCircle2,
     Clock,
     Package,
-    Truck,
-    ChevronRight,
     Activity,
+    FileSearch,
 } from "lucide-react";
-// আপনার তৈরি করা সেন্ট্রাল ডাটা ফাইল
-import { runningOrders, baseStages } from "@/Data/AllOrder";
 
-function TrackOrder() {
+// নতুন স্টেজ "Order Pending" আইডি ০ হিসেবে যুক্ত করা হয়েছে
+const baseStages = [
+    { id: 0, name: "Order Pending" },
+    { id: 1, name: "Yarn Processing" },
+    { id: 2, name: "Knitting / Dyeing" },
+    { id: 3, name: "Cutting & Stitching" },
+    { id: 4, name: "Quality Check" },
+    { id: 5, name: "Ready to Ship" },
+];
+
+function TrackOrder({ orders = [] }) {
     const [searchId, setSearchId] = useState("");
     const [foundOrder, setFoundOrder] = useState(null);
 
-    const handleSearch = () => {
-        const order = runningOrders.find((o) => o.id === searchId);
-        setFoundOrder(order || "not_found");
-    };
+    useEffect(() => {
+        if (searchId.trim() === "") {
+            setFoundOrder(null);
+            return;
+        }
+
+        const order = orders.find(
+            (o) =>
+                o.id.toString() ===
+                searchId.toLowerCase().replace("#ord-", "").trim(),
+        );
+
+        if (order) {
+            setFoundOrder(order);
+        } else {
+            setFoundOrder("not_found");
+        }
+    }, [searchId, orders]);
 
     return (
         <BuyerLayout>
@@ -46,18 +66,12 @@ function TrackOrder() {
                             />
                             <input
                                 type="text"
-                                placeholder="Order ID (e.g. 9921)..."
+                                placeholder="Order ID (e.g. 102)..."
                                 value={searchId}
                                 onChange={(e) => setSearchId(e.target.value)}
                                 className="w-full bg-[#161b22] border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white focus:outline-none focus:border-indigo-500 transition-all font-bold"
                             />
                         </div>
-                        <button
-                            onClick={handleSearch}
-                            className="bg-indigo-600 hover:bg-indigo-700 text-white font-black px-8 rounded-2xl transition-all active:scale-95 uppercase text-xs"
-                        >
-                            Track
-                        </button>
                     </div>
                 </div>
 
@@ -76,27 +90,35 @@ function TrackOrder() {
                                         Product Name
                                     </p>
                                     <h3 className="text-white font-black text-xl uppercase tracking-tight">
-                                        {foundOrder.product}
+                                        {foundOrder.product_name}
                                     </h3>
                                 </div>
                                 <div>
                                     <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest mb-1">
                                         Status
                                     </p>
-                                    <span className="text-amber-500 font-black text-sm uppercase flex items-center gap-2">
+                                    <span
+                                        className={`font-black text-sm uppercase flex items-center gap-2 ${foundOrder.status === "pending" ? "text-blue-400" : "text-amber-500"}`}
+                                    >
                                         <Activity
                                             size={16}
-                                            className="animate-pulse"
+                                            className={
+                                                foundOrder.status !== "pending"
+                                                    ? "animate-pulse"
+                                                    : ""
+                                            }
                                         />{" "}
-                                        In Production
+                                        {foundOrder.status}
                                     </span>
                                 </div>
                                 <div>
                                     <p className="text-slate-600 text-[10px] font-black uppercase tracking-widest mb-1">
-                                        Ordered By
+                                        Deadline
                                     </p>
                                     <h3 className="text-slate-300 font-bold text-sm uppercase">
-                                        {foundOrder.ordered_by}
+                                        {new Date(
+                                            foundOrder.target_delivery,
+                                        ).toLocaleDateString()}
                                     </h3>
                                 </div>
                             </div>
@@ -105,12 +127,16 @@ function TrackOrder() {
                             <div className="bg-[#0F1219] border border-white/5 rounded-[2.5rem] p-10 shadow-2xl relative overflow-hidden">
                                 <div className="relative z-10 space-y-12">
                                     {baseStages.map((stage, i) => {
+                                        // যদি স্ট্যাটাস pending হয় তবে কারেন্ট স্টেজ ০ (Pending) হবে
+                                        const currentProgressId =
+                                            foundOrder.status === "pending"
+                                                ? 0
+                                                : foundOrder.current_stage_id;
+
                                         const isCompleted =
-                                            stage.id <
-                                            foundOrder.currentStageId;
+                                            stage.id < currentProgressId;
                                         const isCurrent =
-                                            stage.id ===
-                                            foundOrder.currentStageId;
+                                            stage.id === currentProgressId;
 
                                         return (
                                             <div
@@ -146,7 +172,9 @@ function TrackOrder() {
                                                         />
                                                     ) : (
                                                         <span className="text-slate-700 text-xs font-black">
-                                                            {stage.id}
+                                                            {stage.id === 0
+                                                                ? "P"
+                                                                : stage.id}
                                                         </span>
                                                     )}
                                                 </div>
@@ -164,29 +192,12 @@ function TrackOrder() {
                                                         {isCompleted
                                                             ? "Finished Successfully"
                                                             : isCurrent
-                                                              ? "Currently in this stage"
+                                                              ? foundOrder.status ===
+                                                                "pending"
+                                                                  ? "Waiting for admin to review"
+                                                                  : "Currently in this stage"
                                                               : "Waiting to Start"}
                                                     </p>
-                                                    {isCurrent && (
-                                                        <motion.div
-                                                            initial={{
-                                                                opacity: 0,
-                                                            }}
-                                                            animate={{
-                                                                opacity: 1,
-                                                            }}
-                                                            className="mt-4 p-4 bg-white/5 rounded-2xl border border-white/5 inline-block"
-                                                        >
-                                                            <p className="text-slate-400 text-xs font-medium italic">
-                                                                "The materials
-                                                                have been
-                                                                issued.
-                                                                Production is
-                                                                running as per
-                                                                schedule."
-                                                            </p>
-                                                        </motion.div>
-                                                    )}
                                                 </div>
                                             </div>
                                         );
