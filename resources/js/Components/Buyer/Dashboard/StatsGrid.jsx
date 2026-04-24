@@ -7,41 +7,43 @@ import {
     Truck,
 } from "lucide-react";
 
-const stats = [
-    {
-        label: "Active Orders",
-        value: "05",
-        icon: ShoppingBag,
-        color: "text-blue-500",
-        bg: "bg-blue-500/10",
-    },
-    {
-        label: "In Production",
-        value: "03",
-        icon: Timer,
-        color: "text-amber-500",
-        bg: "bg-amber-500/10",
-    },
-    {
-        label: "Shipped",
-        value: "12",
-        icon: Truck,
-        color: "text-indigo-500",
-        bg: "bg-indigo-500/10",
-    },
-    {
-        label: "Completed",
-        value: "48",
-        icon: CheckCircle2,
-        color: "text-emerald-500",
-        bg: "bg-emerald-500/10",
-    },
-];
+// stats প্রপস রিসিভ করা হচ্ছে
+function StatsGrid({ stats }) {
+    // ডাটাবেস থেকে আসা ডাটার ওপর ভিত্তি করে কনফিগারেশন অ্যারে
+    const statCards = [
+        {
+            label: "Active Orders",
+            value: stats?.total || "00", // কন্ট্রোলার থেকে পাঠানো কী (key) অনুযায়ী
+            icon: ShoppingBag,
+            color: "text-blue-500",
+            bg: "bg-blue-500/10",
+        },
+        {
+            label: "In Production",
+            value: stats?.running || "00",
+            icon: Timer,
+            color: "text-amber-500",
+            bg: "bg-amber-500/10",
+        },
+        {
+            label: "Shipped",
+            value: stats?.shipped || "00", // যদি ডাটাবেসে shipped কাউন্ট থাকে
+            icon: Truck,
+            color: "text-indigo-500",
+            bg: "bg-indigo-500/10",
+        },
+        {
+            label: "Completed",
+            value: stats?.completed || "00",
+            icon: CheckCircle2,
+            color: "text-emerald-500",
+            bg: "bg-emerald-500/10",
+        },
+    ];
 
-function StatsGrid() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-            {stats.map((stat, i) => (
+            {statCards.map((stat, i) => (
                 <div
                     key={i}
                     className="bg-[#080B11] border border-white/5 p-6 rounded-2xl hover:border-blue-500/30 transition-all group"
@@ -52,6 +54,7 @@ function StatsGrid() {
                         >
                             <stat.icon size={24} />
                         </div>
+                        {/* গ্রোথ পার্সেন্টেজ (আপাতত স্ট্যাটিক রাখা হয়েছে) */}
                         <span className="flex items-center text-[10px] font-bold text-emerald-500 bg-emerald-500/10 px-2 py-1 rounded-lg">
                             <ArrowUpRight size={12} className="mr-1" /> 12%
                         </span>
@@ -60,7 +63,10 @@ function StatsGrid() {
                         {stat.label}
                     </h3>
                     <p className="text-2xl font-bold text-white mt-1">
-                        {stat.value}
+                        {/* ভ্যালু ফরম্যাটিং (যেমন: ৫ কে ০৫ দেখানো) */}
+                        {stat.value < 10 && stat.value > 0
+                            ? `0${stat.value}`
+                            : stat.value}
                     </p>
                 </div>
             ))}

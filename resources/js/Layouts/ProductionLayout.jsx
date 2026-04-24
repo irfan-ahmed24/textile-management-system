@@ -17,6 +17,7 @@ import {
     ChevronDown,
     Cpu,
     Truck,
+    ShoppingBag,
 } from "lucide-react";
 
 export default function ProductionLayout({ children, header }) {
@@ -38,16 +39,39 @@ export default function ProductionLayout({ children, header }) {
     const navigation = [
         {
             name: "Prod. Dashboard",
-            href: "/production/dashboard",
+            href: "/production-manager/dashboard",
             icon: LayoutDashboard,
         },
-        { name: "Running Orders", href: "/production/orders", icon: Activity },
-        { name: "Production Stages", href: "/production/stages", icon: Layers },
-        { name: "Daily Logs", href: "/production/logs", icon: ClipboardList },
-        { name: "Quality Control", href: "/production/qc", icon: CheckCircle },
-        { name: "Machine Status", href: "/production/machines", icon: Cpu },
-        { name: "Material Request", href: "/production/requests", icon: Truck },
-        { name: "Settings", href: "/production/settings", icon: Settings },
+        {
+            name: "Running Orders",
+            href: "/production-manager/running-order",
+            icon: Activity,
+        },
+        {
+            name: "Production Stages",
+            href: "/production-manager/stages",
+            icon: Layers,
+        },
+        {
+            name: "Quality Control",
+            href: "/production-manager/qc",
+            icon: CheckCircle,
+        },
+        {
+            name: "Order Requests",
+            href: "/production-manager/order-request",
+            icon: ShoppingBag,
+        },
+        {
+            name: "Material Request",
+            href: "/production-manager/material-request",
+            icon: Truck,
+        },
+        {
+            name: "Settings",
+            href: "/production-manager/settings",
+            icon: Settings,
+        },
     ];
 
     const SidebarContent = (isMobile = false) => (
@@ -156,7 +180,7 @@ export default function ProductionLayout({ children, header }) {
             {/* Desktop Sidebar */}
             <motion.aside
                 animate={{ width: isSidebarOpen ? "288px" : "80px" }}
-                className="hidden lg:flex fixed inset-y-0 left-0 z-[70] bg-[#080B11] border-r border-white/5 flex-col transition-all duration-300"
+                className="hidden lg:flex fixed inset-y-0 left-0 z-[30] bg-[#080B11] border-r border-white/5 flex-col transition-all duration-300"
             >
                 {SidebarContent(false)}
             </motion.aside>
@@ -187,10 +211,6 @@ export default function ProductionLayout({ children, header }) {
                     </div>
 
                     <div className="flex items-center gap-3 sm:gap-6">
-                        <button className="p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 hidden md:block hover:text-amber-400">
-                            <Search size={20} />
-                        </button>
-
                         <div className="relative">
                             <button
                                 onClick={() =>
