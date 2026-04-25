@@ -8,6 +8,7 @@ use Inertia\Inertia;
 use App\Http\Controllers\Production\DashboardController;
 use App\Http\Controllers\Production\RunningOrderController;
 use App\Http\Controllers\Production\StageController;
+use App\Http\Controllers\Production\AllOrderController;
 use App\Http\Controllers\Production\OrderRequestController;
 use App\Http\Controllers\Production\MaterialRequestController;
 
@@ -16,6 +17,7 @@ Route::middleware(['auth'])->prefix('/production-manager')->group(function () {
     Route::get("/dashboard", [DashboardController::class, 'index'])->name("production.dashboard");
 
     Route::get("/running-order", [RunningOrderController::class, 'index'])->name("production.running-order");
+    Route::post("/running-order/update/{id}", [RunningOrderController::class, 'updateStatus'])->name("production.running-order.update");
 
     Route::get("/stages", [StageController::class, 'index'])->name("production.stages");
 
@@ -24,9 +26,10 @@ Route::middleware(['auth'])->prefix('/production-manager')->group(function () {
 
     // কোটেশন পাঠানোর জন্য
     Route::post("/order-request/send-quote", [OrderRequestController::class, 'sendQuote'])->name("production.order-request.send-quote");
-
-    // Fix: Approve রাউটটিকে PUT থেকে POST করা হলো যাতে ফ্রন্টএন্ডের রিকোয়েস্টের সাথে ম্যাচ করে
     Route::post("/order-request/{id}/approve", [OrderRequestController::class, 'approveOrder'])->name("production.order-request.approve");
+
+
+    Route::get("/all-orders", [AllOrderController::class, "index"])->name("production.all-orders");
 
     Route::get("/material-request", [MaterialRequestController::class, "index"])->name("production.material-request");
 

@@ -43,6 +43,11 @@ export default function ProductionLayout({ children, header }) {
             icon: LayoutDashboard,
         },
         {
+            name: "All Orders",
+            href: "/production-manager/all-orders",
+            icon: CheckCircle,
+        },
+        {
             name: "Running Orders",
             href: "/production-manager/running-order",
             icon: Activity,
@@ -52,11 +57,7 @@ export default function ProductionLayout({ children, header }) {
             href: "/production-manager/stages",
             icon: Layers,
         },
-        {
-            name: "Quality Control",
-            href: "/production-manager/qc",
-            icon: CheckCircle,
-        },
+
         {
             name: "Order Requests",
             href: "/production-manager/order-request",
