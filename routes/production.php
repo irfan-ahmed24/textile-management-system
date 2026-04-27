@@ -32,6 +32,7 @@ Route::middleware(['auth'])->prefix('/production-manager')->group(function () {
     Route::get("/all-orders", [AllOrderController::class, "index"])->name("production.all-orders");
 
     Route::get("/material-request", [MaterialRequestController::class, "index"])->name("production.material-request");
+    Route::post("/material-request", [MaterialRequestController::class, "store"])->name("production.material-request.store");
 
     Route::get("/settings", [SettingsController::class, "index"])->name("production.settings");
 

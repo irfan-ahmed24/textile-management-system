@@ -25,6 +25,7 @@
     "dependencies": {
         "framer-motion": "^12.38.0",
         "lucide-react": "^1.8.0",
+        "qrcode.react": "^4.2.0",
         "react-hot-toast": "^2.6.0",
         "react-qr-barcode-scanner": "^2.1.25"
     }

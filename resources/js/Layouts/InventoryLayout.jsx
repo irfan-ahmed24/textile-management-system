@@ -62,9 +62,9 @@ export default function InventoryLayout({ children, header }) {
             icon: AlertTriangle,
         },
         {
-            name: "Waste Management",
-            href: "/inventory-manager/waste",
-            icon: Trash2,
+            name: "Material Requests",
+            href: "/inventory-manager/material-requests",
+            icon: Truck,
         },
         {
             name: "Settings",

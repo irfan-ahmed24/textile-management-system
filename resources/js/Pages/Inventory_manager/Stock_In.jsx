@@ -57,7 +57,6 @@ function Stock_In() {
         post(route("inventory.stockIn.store"), {
             onSuccess: () => {
                 reset();
-                // প্রিমিয়াম ডার্ক স্টাইল সাকসেস মেসেজ
                 toast.success("Inventory Updated Successfully!", {
                     duration: 4000,
                     position: "top-right",
@@ -76,7 +75,6 @@ function Stock_In() {
                 });
             },
             onError: () => {
-                // এরর মেসেজ
                 toast.error("Submission Failed! Check details.", {
                     style: {
                         borderRadius: "20px",

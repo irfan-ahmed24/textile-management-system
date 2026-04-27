@@ -8,10 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class Inventory extends Model
 {
     use HasFactory;
-
-    /**
-     * যে কলামগুলোতে ডাটা ইনপুট বা আপডেট করা যাবে।
-     */
     protected $fillable = [
         'item_name',
         'item_code',
@@ -24,10 +20,6 @@ class Inventory extends Model
         'is_active',
         'description',
     ];
-
-    /**
-     * ডাটা টাইপ কাস্টিং (যাতে ক্যালকুলেশন সঠিক হয়)।
-     */
     protected $casts = [
         'quantity' => 'decimal:2',
         'min_stock_level' => 'decimal:2',
