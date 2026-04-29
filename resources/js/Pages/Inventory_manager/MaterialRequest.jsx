@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import InventoryLayout from "@/Layouts/InventoryLayout";
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
 import { QRCodeSVG } from "qrcode.react";
+import toast, { Toaster } from "react-hot-toast";
 import {
     PackageSearch,
     Clock,
@@ -18,49 +19,9 @@ import {
     PackageCheck,
 } from "lucide-react";
 
-function MaterialRequest() {
+function MaterialRequest({ requests = [] }) {
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    // ডামি ডাটা (আপনার ডাটাবেস থেকে আসা ডাটার ফরম্যাট এমন হতে পারে)
-    const requests = [
-        {
-            id: "REQ-9921",
-            item_name: "Cotton Yarn 30s",
-            item_code: "MTR-101",
-            qty: "150",
-            unit: "KG",
-            requested_by: "Irfan Ahmed",
-            dept: "Knitting Floor",
-            date: "25 Apr, 2026",
-            status: "Pending", // Pending থাকলে বাটন দেখাবে
-            reason: "Urgent production for Order #ORD-771",
-        },
-        {
-            id: "REQ-9925",
-            item_name: "Polyester Thread",
-            item_code: "MTR-205",
-            qty: "40",
-            unit: "Rolls",
-            requested_by: "Manager Zubair",
-            dept: "Stitching Unit",
-            date: "24 Apr, 2026",
-            status: "Approved", // Approved থাকলে QR ওপেন হবে
-            reason: "Regular replenishment",
-        },
-        {
-            id: "REQ-9930",
-            item_name: "Indigo Dye",
-            item_code: "MTR-402",
-            qty: "10",
-            unit: "KG",
-            requested_by: "Irfan Ahmed",
-            dept: "Dyeing Unit",
-            date: "26 Apr, 2026",
-            status: "Stock Out", // স্টক আউট স্ট্যাটাস
-            reason: "Production started",
-        },
-    ];
 
     const openModal = (req) => {
         if (req.status === "Approved") {
@@ -69,26 +30,48 @@ function MaterialRequest() {
         }
     };
 
+    const handleStatusUpdate = (id, status) => {
+        router.patch(
+            route("inventory.material-request.update", id),
+            { status },
+            {
+                onSuccess: () =>
+                    toast.success(`Request ${status} successfully!`),
+            },
+        );
+    };
+
+    // আপনার ছবির মতো সাদা বর্ডারসহ ডাউনলোড করার ফাংশন
     const downloadQRCode = () => {
         const svg = document.getElementById("request-qr");
         const svgData = new XMLSerializer().serializeToString(svg);
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d");
         const img = new Image();
+
         img.onload = () => {
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
+            // রেজোলিউশন ভালো রাখার জন্য সাইজ সেট করা
+            const padding = 40; // সাদা বর্ডারের সাইজ
+            canvas.width = img.width + padding;
+            canvas.height = img.height + padding;
+
+            // ব্যাকগ্রাউন্ড সাদা করা
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // ইমেজ ড্র করা (মাঝখানে রাখা)
+            ctx.drawImage(img, padding / 2, padding / 2);
+
             const pngFile = canvas.toDataURL("image/png");
             const downloadLink = document.createElement("a");
-            downloadLink.download = `${selectedRequest.id}-QR.png`;
+            downloadLink.download = `${selectedRequest.id}-GatePass.png`;
             downloadLink.href = pngFile;
             downloadLink.click();
         };
+
         img.src = "data:image/svg+xml;base64," + btoa(svgData);
     };
 
-    // স্ট্যাটাস কালার হ্যান্ডলার
     const getStatusStyle = (status) => {
         switch (status) {
             case "Approved":
@@ -97,7 +80,7 @@ function MaterialRequest() {
                 return "bg-amber-500/10 text-amber-500 border-amber-500/20";
             case "Rejected":
                 return "bg-red-500/10 text-red-500 border-red-500/20";
-            case "Stock Out":
+            case "completed":
                 return "bg-blue-500/10 text-blue-500 border-blue-500/20";
             default:
                 return "bg-slate-500/10 text-slate-500 border-slate-500/20";
@@ -107,6 +90,7 @@ function MaterialRequest() {
     return (
         <InventoryLayout>
             <Head title="Material Requests | Inventory" />
+            <Toaster position="top-right" />
 
             <div className="p-6 max-w-[1600px] mx-auto">
                 <div className="flex justify-between items-center mb-10">
@@ -119,7 +103,8 @@ function MaterialRequest() {
                             Production Material Requests
                         </h1>
                         <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mt-1">
-                            Review and process raw material requisitions
+                            Review and process raw material requisitions from
+                            the factory floor
                         </p>
                     </div>
                 </div>
@@ -129,9 +114,7 @@ function MaterialRequest() {
                         <table className="w-full text-left">
                             <thead className="bg-white/5 text-slate-500 text-[10px] uppercase font-black tracking-widest">
                                 <tr>
-                                    <th className="px-8 py-6">
-                                        Requisition ID
-                                    </th>
+                                    <th className="px-8 py-6">ID</th>
                                     <th className="px-8 py-6">
                                         Material Details
                                     </th>
@@ -144,106 +127,121 @@ function MaterialRequest() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {requests.map((req) => (
-                                    <tr
-                                        key={req.id}
-                                        className={`group transition-all ${req.status === "Approved" ? "cursor-pointer hover:bg-white/[0.02]" : ""}`}
-                                        onClick={() => openModal(req)}
-                                    >
-                                        <td className="px-8 py-5">
-                                            <span className="text-blue-500 font-black font-mono text-sm">
+                                {requests.length > 0 ? (
+                                    requests.map((req) => (
+                                        <tr
+                                            key={req.id}
+                                            className={`group transition-all ${req.status === "Approved" ? "cursor-pointer hover:bg-white/[0.02]" : ""}`}
+                                            onClick={() => openModal(req)}
+                                        >
+                                            <td className="px-8 py-5 text-blue-500 font-black font-mono text-sm">
                                                 #{req.id}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <span className="text-white font-bold block">
-                                                {req.item_name}
-                                            </span>
-                                            <span className="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
-                                                {req.item_code}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <div className="flex items-center gap-2">
-                                                <div className="w-7 h-7 bg-white/5 rounded-full flex items-center justify-center border border-white/5 text-slate-400">
-                                                    <User size={14} />
+                                            </td>
+                                            <td className="px-8 py-5">
+                                                <span className="text-white font-bold block uppercase text-xs">
+                                                    {req.item_name}
+                                                </span>
+                                                <span className="text-[10px] text-slate-500 font-bold uppercase">
+                                                    {req.item_code}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-5">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="w-7 h-7 bg-white/5 rounded-full flex items-center justify-center text-slate-400">
+                                                        <User size={14} />
+                                                    </div>
+                                                    <div>
+                                                        <span className="text-slate-300 text-sm font-bold block leading-none">
+                                                            {req.requested_by}
+                                                        </span>
+                                                        <span className="text-[9px] text-slate-600 font-bold uppercase">
+                                                            {req.dept}
+                                                        </span>
+                                                    </div>
                                                 </div>
-                                                <div>
-                                                    <span className="text-slate-300 text-sm font-bold block leading-none">
-                                                        {req.requested_by}
-                                                    </span>
-                                                    <span className="text-[9px] text-slate-600 font-bold uppercase">
-                                                        {req.dept}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <span className="text-white font-black">
+                                            </td>
+                                            <td className="px-8 py-5 text-white font-black">
                                                 {req.qty}{" "}
                                                 <small className="text-slate-500">
                                                     {req.unit}
                                                 </small>
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5">
-                                            <span
-                                                className={`text-[9px] px-3 py-1 rounded-lg font-black uppercase tracking-widest border ${getStatusStyle(req.status)}`}
-                                            >
-                                                {req.status === "Stock Out" && (
-                                                    <PackageCheck
-                                                        size={10}
-                                                        className="inline mr-1 mb-0.5"
-                                                    />
-                                                )}
-                                                {req.status}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-5 text-right">
-                                            <div
-                                                className="flex justify-end gap-2"
-                                                onClick={(e) =>
-                                                    e.stopPropagation()
-                                                }
-                                            >
+                                            </td>
+                                            <td className="px-8 py-5">
+                                                <span
+                                                    className={`text-[9px] px-3 py-1 rounded-lg font-black uppercase tracking-widest border ${getStatusStyle(req.status)}`}
+                                                >
+                                                    {req.status ===
+                                                        "completed" && (
+                                                        <PackageCheck
+                                                            size={10}
+                                                            className="inline mr-1 mb-0.5"
+                                                        />
+                                                    )}
+                                                    {req.status}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-5 text-right flex justify-end gap-2">
                                                 {req.status === "Pending" ? (
-                                                    <>
+                                                    <div
+                                                        className="flex gap-2"
+                                                        onClick={(e) =>
+                                                            e.stopPropagation()
+                                                        }
+                                                    >
                                                         <button
+                                                            onClick={() =>
+                                                                handleStatusUpdate(
+                                                                    req.id,
+                                                                    "approved",
+                                                                )
+                                                            }
                                                             className="p-2 bg-emerald-500/10 text-emerald-500 hover:bg-emerald-500 hover:text-white rounded-lg transition-all border border-emerald-500/20"
-                                                            title="Approve"
                                                         >
                                                             <Check size={18} />
                                                         </button>
                                                         <button
+                                                            onClick={() =>
+                                                                handleStatusUpdate(
+                                                                    req.id,
+                                                                    "rejected",
+                                                                )
+                                                            }
                                                             className="p-2 bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white rounded-lg transition-all border border-red-500/20"
-                                                            title="Reject"
                                                         >
                                                             <Ban size={18} />
                                                         </button>
-                                                    </>
+                                                    </div>
                                                 ) : req.status ===
                                                   "Approved" ? (
-                                                    <button className="p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/20 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                                    <button className="p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/20 transition-all">
                                                         <ArrowUpRight
                                                             size={18}
                                                         />
                                                     </button>
                                                 ) : (
-                                                    <span className="text-[10px] font-black text-slate-700 uppercase px-2 py-1">
-                                                        ARCHIVED
+                                                    <span className="text-[10px] font-black text-slate-700 uppercase tracking-widest">
+                                                        Closed
                                                     </span>
                                                 )}
-                                            </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td
+                                            colSpan="6"
+                                            className="p-10 text-center text-slate-500 font-bold uppercase text-xs"
+                                        >
+                                            No requests found
                                         </td>
                                     </tr>
-                                ))}
+                                )}
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            {/* Request Detail & QR Pop-up (Only for Approved) */}
             <AnimatePresence>
                 {isModalOpen && selectedRequest && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
@@ -287,7 +285,7 @@ function MaterialRequest() {
                                                 <p className="text-slate-500 text-[9px] font-black uppercase mb-1">
                                                     Item Name
                                                 </p>
-                                                <p className="text-white font-bold text-sm">
+                                                <p className="text-white font-bold text-sm uppercase">
                                                     {selectedRequest.item_name}
                                                 </p>
                                             </div>
@@ -334,12 +332,14 @@ function MaterialRequest() {
                                     </div>
                                 </div>
                                 <div className="p-12 bg-white/[0.02] flex flex-col items-center justify-center text-center">
-                                    <div className="relative p-6 bg-white rounded-[2rem] shadow-[0_0_50px_rgba(16,185,129,0.15)]">
+                                    <div className="relative p-2 bg-white rounded-[1.5rem] shadow-[0_0_50px_rgba(16,185,129,0.15)] overflow-hidden">
                                         <QRCodeSVG
                                             id="request-qr"
-                                            value={`REQ_ID:${selectedRequest.id}|CODE:${selectedRequest.item_code}|QTY:${selectedRequest.qty}`}
-                                            size={200}
+                                            // সব তথ্য যুক্ত করা হলো: ID, Item Name, Requester, Dept, Item Code, Qty, Reason
+                                            value={`REQ_ID:${selectedRequest.id}|NAME:${selectedRequest.item_name}|BY:${selectedRequest.requested_by}|DEPT:${selectedRequest.dept}|CODE:${selectedRequest.item_code}|QTY:${selectedRequest.qty}|NOTE:${selectedRequest.reason || "N/A"}`}
+                                            size={220}
                                             level={"H"}
+                                            includeMargin={true}
                                         />
                                     </div>
                                     <div className="mt-8">

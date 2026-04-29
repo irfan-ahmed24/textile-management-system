@@ -1,6 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Hash, Truck, User, Weight, ArrowUpRight, Loader2 } from "lucide-react";
+import {
+    Hash,
+    Truck,
+    User,
+    Weight,
+    ArrowUpRight,
+    Loader2,
+    Edit3,
+    Lock,
+} from "lucide-react";
 
 export default function StockOutForm({
     data,
@@ -10,14 +19,59 @@ export default function StockOutForm({
     errors,
     reasons,
 }) {
+    // ম্যানুয়াল এন্ট্রি মোড হ্যান্ডেল করার জন্য স্টেট
+    const [isManual, setIsManual] = useState(false);
+
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="lg:col-span-2 bg-[#0F1219]/80 border border-white/5 rounded-[2.5rem] p-8 md:p-10 backdrop-blur-xl shadow-2xl"
         >
+            {/* Header with Manual Toggle Button */}
+            <div className="flex justify-between items-center mb-8">
+                <h3 className="text-white font-black uppercase tracking-widest text-sm">
+                    Stock Out Details
+                </h3>
+                <button
+                    type="button"
+                    onClick={() => setIsManual(!isManual)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-[10px] font-black uppercase tracking-widest ${
+                        isManual
+                            ? "bg-amber-500/20 border-amber-500/50 text-amber-500"
+                            : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"
+                    }`}
+                >
+                    {isManual ? <Edit3 size={14} /> : <Lock size={14} />}
+                    {isManual ? "Manual Mode On" : "Enable Manual Entry"}
+                </button>
+            </div>
+
             <form onSubmit={submit} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    {/* Request ID (New Field) */}
+                    <div className="space-y-2">
+                        <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">
+                            Request ID
+                        </label>
+                        <div className="relative group">
+                            <Hash
+                                className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600"
+                                size={18}
+                            />
+                            <input
+                                type="text"
+                                disabled={!isManual} // ম্যানুয়াল মোড না হলে অফ থাকবে
+                                value={data.request_id || ""}
+                                onChange={(e) =>
+                                    setData("request_id", e.target.value)
+                                }
+                                className={`w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 text-white focus:outline-none focus:border-red-500/40 transition-all ${!isManual && "opacity-50 cursor-not-allowed"}`}
+                                placeholder="Auto-filled from QR"
+                            />
+                        </div>
+                    </div>
+
                     {/* Item Code */}
                     <div className="space-y-2">
                         <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">
@@ -31,11 +85,12 @@ export default function StockOutForm({
                             <input
                                 type="text"
                                 required
-                                value={data.item_code}
+                                disabled={!isManual}
+                                value={data.item_code || ""}
                                 onChange={(e) =>
                                     setData("item_code", e.target.value)
                                 }
-                                className={`w-full bg-white/5 border ${errors.item_code ? "border-red-500/50" : "border-white/10"} rounded-2xl py-4 pl-12 text-white focus:outline-none focus:border-red-500/40 transition-all`}
+                                className={`w-full bg-white/5 border ${errors.item_code ? "border-red-500/50" : "border-white/10"} rounded-2xl py-4 pl-12 text-white focus:outline-none focus:border-red-500/40 transition-all ${!isManual && "opacity-50 cursor-not-allowed"}`}
                                 placeholder="Enter or scan code"
                             />
                         </div>
@@ -59,11 +114,12 @@ export default function StockOutForm({
                             <input
                                 type="text"
                                 required
-                                value={data.recipient}
+                                disabled={!isManual}
+                                value={data.Dept || ""}
                                 onChange={(e) =>
-                                    setData("recipient", e.target.value)
+                                    setData("Dept", e.target.value)
                                 }
-                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 text-white focus:outline-none focus:border-red-500/40 transition-all"
+                                className={`w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 text-white focus:outline-none focus:border-red-500/40 transition-all ${!isManual && "opacity-50 cursor-not-allowed"}`}
                                 placeholder="e.g. Dyeing Unit / Buyer Name"
                             />
                         </div>
@@ -82,13 +138,14 @@ export default function StockOutForm({
                             <input
                                 type="number"
                                 required
+                                disabled={!isManual}
                                 min="0.01"
                                 step="0.01"
-                                value={data.quantity}
+                                value={data.quantity || ""}
                                 onChange={(e) =>
                                     setData("quantity", e.target.value)
                                 }
-                                className={`w-full bg-white/5 border ${errors.quantity ? "border-red-500/50" : "border-white/10"} rounded-2xl py-4 pl-12 text-white focus:outline-none focus:border-red-500/40 transition-all`}
+                                className={`w-full bg-white/5 border ${errors.quantity ? "border-red-500/50" : "border-white/10"} rounded-2xl py-4 pl-12 text-white focus:outline-none focus:border-red-500/40 transition-all ${!isManual && "opacity-50 cursor-not-allowed"}`}
                                 placeholder="0.00"
                             />
                         </div>
@@ -111,11 +168,12 @@ export default function StockOutForm({
                             />
                             <select
                                 required
-                                value={data.reason}
+                                disabled={!isManual}
+                                value={data.reason || ""}
                                 onChange={(e) =>
                                     setData("reason", e.target.value)
                                 }
-                                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 text-white appearance-none focus:outline-none focus:border-red-500/40 transition-all"
+                                className={`w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 text-white appearance-none focus:outline-none focus:border-red-500/40 transition-all ${!isManual && "opacity-50 cursor-not-allowed"}`}
                             >
                                 <option value="" className="bg-[#0F1219]">
                                     Select Reason
@@ -134,18 +192,20 @@ export default function StockOutForm({
                     </div>
                 </div>
 
+                {/* Reference Note */}
                 <div className="space-y-2">
                     <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">
                         Reference / Note
                     </label>
                     <textarea
-                        value={data.note}
+                        value={data.note || ""}
                         onChange={(e) => setData("note", e.target.value)}
                         className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 px-6 text-white h-24 focus:outline-none focus:border-red-500/40 transition-all resize-none"
                         placeholder="Add any internal reference number or instructions..."
                     ></textarea>
                 </div>
 
+                {/* Submit Button */}
                 <button
                     type="submit"
                     disabled={processing}

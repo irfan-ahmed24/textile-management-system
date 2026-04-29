@@ -24,6 +24,7 @@ Route::middleware(['auth'])->prefix('inventory-manager')->group(function () {
 
 
     Route::get("/material-requests", [MaterialRequestController::class, 'index'])->name('inventory.material_requests');
+    Route::patch("/material-requests/{id}/status", [MaterialRequestController::class, 'updateStatus'])->name('inventory.material-request.update');
 
 
 
