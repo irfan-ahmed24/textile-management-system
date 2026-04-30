@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import WelcomeLayout from "../Layouts/WelcomeLayout";
 import { motion } from "framer-motion";
 import {
@@ -14,9 +14,33 @@ import {
     Factory,
     Layers,
 } from "lucide-react";
-import { Link } from "@inertiajs/react";
+import { Link, usePage, Head } from "@inertiajs/react"; // Head ইম্পোর্ট করা হয়েছে
+import toast, { Toaster } from "react-hot-toast";
 
 function Welcome() {
+    const { flash } = usePage().props; // লারাভেল থেকে আসা ফ্ল্যাশ মেসেজ
+
+    useEffect(() => {
+        // যদি রেজিস্ট্রেশনের পর কোনো সাকসেস মেসেজ থাকে তবে টোস্ট দেখাবে
+        if (flash && flash.success) {
+            toast.success(flash.success, {
+                style: {
+                    background: "#0F1219",
+                    color: "#fff",
+                    borderRadius: "20px",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                },
+                iconTheme: {
+                    primary: "#3B82F6",
+                    secondary: "#fff",
+                },
+                duration: 6000,
+            });
+        }
+    }, [flash]);
+
     const fadeInUp = {
         initial: { opacity: 0, y: 30 },
         whileInView: { opacity: 1, y: 0 },
@@ -26,6 +50,12 @@ function Welcome() {
 
     return (
         <WelcomeLayout>
+            {/* ব্রাউজার ট্যাব টাইটেল সেট করার জন্য Head ব্যবহার */}
+            <Head title="Premium Fabric Standards | TextileMS" />
+
+            {/* টোস্ট মেসেজ দেখানোর কন্টেইনার */}
+            <Toaster position="top-right" reverseOrder={false} />
+
             {/* --- Hero Section --- */}
             <section
                 id="hero"
@@ -141,7 +171,6 @@ function Welcome() {
                     </h2>
 
                     <div className="grid md:grid-cols-4 gap-4 relative">
-                        {/* Step 1 */}
                         {[
                             {
                                 step: "01",
@@ -195,9 +224,7 @@ function Welcome() {
             {/* --- Legacy Section --- */}
             <section id="legacy" className="py-24 bg-[#080B11]">
                 <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-20 items-center">
-                    {/* Images Grid */}
                     <div className="grid grid-cols-2 gap-4">
-                        {/* First Image: Factory Interior */}
                         <div className="relative h-64 rounded-3xl overflow-hidden border border-blue-500/20 group">
                             <img
                                 src="assets/images/technical_textile.webp"
@@ -211,7 +238,6 @@ function Welcome() {
                             </div>
                         </div>
 
-                        {/* Second Image: Fabric Close-up */}
                         <div className="relative h-64 rounded-3xl overflow-hidden mt-12 border border-white/5 group">
                             <img
                                 src="assets/images/images.jpg"
@@ -222,7 +248,6 @@ function Welcome() {
                         </div>
                     </div>
 
-                    {/* Content Side */}
                     <motion.div {...fadeInUp}>
                         <h2 className="text-4xl font-bold text-white mb-6">
                             A Heritage of Quality
@@ -255,7 +280,7 @@ function Welcome() {
                 </div>
             </section>
 
-            {/* --- Contact / Final CTA --- */}
+            {/* --- Final CTA Section --- */}
             <section id="contact" className="py-24 bg-[#0F1219]">
                 <div className="max-w-6xl mx-auto px-6 text-center">
                     <div className="bg-gradient-to-b from-blue-600 to-blue-800 rounded-[3rem] p-12 lg:p-24 relative overflow-hidden">
@@ -274,7 +299,6 @@ function Welcome() {
                                 Apply as a Buyer <ArrowRight />
                             </Link>
                         </div>
-                        {/* Decorative Background */}
                         <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -ml-32 -mt-32 blur-3xl"></div>
                         <div className="absolute bottom-0 right-0 w-64 h-64 bg-black/20 rounded-full -mr-32 -mt-32 blur-3xl"></div>
                     </div>

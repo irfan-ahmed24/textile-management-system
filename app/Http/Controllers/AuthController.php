@@ -7,6 +7,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
+use App\Models\Notification;
+use Illuminate\Validation\Rules;
+
 
 class AuthController extends Controller
 {
@@ -37,6 +42,46 @@ class AuthController extends Controller
         throw ValidationException::withMessages([
             'email' => 'The provided credentials do not match our records.',
         ]);
+    }
+
+    public function showRegister()
+    {
+        return Inertia::render('auth/Registration');
+    }
+
+    /**
+     * নতুন বায়ার রেজিস্ট্রেশন করার জন্য
+     */
+    public function register(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'company_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+        ]);
+
+        // ১. ইউজার তৈরি করা (স্ট্যাটাস ডিফল্টভাবে pending থাকবে)
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+            'company_name' => $request->company_name,
+            'phone' => $request->phone,
+            'role' => 'buyer',
+            'status' => 'pending',
+        ]);
+
+        Notification::create([
+            'type' => 'buyer_request',
+            'message' => "New Buyer Registration Request from: {$user->name}",
+            'user_id' => $user->id,
+            'is_read' => false,
+        ]);
+
+        // ৩. রেজিস্ট্রেশনের পর লগইন না করিয়ে মেসেজসহ রিডাইরেক্ট করা
+        return redirect()->route('home')->with('success', 'Your request has been sent! Please wait for admin approval.');
     }
 
     /**
