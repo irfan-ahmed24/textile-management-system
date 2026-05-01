@@ -48,7 +48,6 @@ class HandleInertiaRequests extends Middleware
                     ->get();
             },
 
-            // ৩. ফ্ল্যাশ মেসেজ (রেজিস্ট্রেশন বা অন্য কাজের পর টোস্ট দেখানোর জন্য)
             'flash' => [
                 'success' => fn() => $request->session()->get('success'),
                 'error' => fn() => $request->session()->get('error'),

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\UserManage;
 use App\Http\Controllers\Admin\UserRequestController;
 use App\Http\Controllers\Admin\InventoryReportController;
@@ -16,15 +17,12 @@ use Inertia\Inertia;
 
 Route::middleware(['auth'])->prefix('admin')->group(function () {
 
-    Route::get("/dashboard", function () {
-        return Inertia::render("Admin/Dashboard");
-    })->name("admin.dashboard");
+    Route::get("/dashboard", [DashboardController::class, "index"])->name("admin.dashboard");
 
 
-    // নোটিফিকেশন রিড করার রাউট
+
     Route::patch('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('admin.notification.read');
     Route::post('/notifications/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('notification.allRead');
-
 
 
     Route::get('/user-management', [UserManage::class, 'index'])->name('admin.users');
@@ -33,7 +31,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
 
 
     Route::get('/user-requests', [UserRequestController::class, 'index'])->name('admin.user-requests');
-    Route::post('/user-requests/{id}/approve', [UserRequestController::class, 'approve'])->name('admin.user-requests.approve');
+    Route::patch('/user-requests/{id}/approve', [UserRequestController::class, 'approve'])->name('admin.user-requests.approve');
     Route::delete('/user-requests/{id}/reject', [UserRequestController::class, 'reject'])->name('admin.user-requests.reject');
 
 

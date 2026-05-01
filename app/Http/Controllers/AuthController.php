@@ -29,15 +29,21 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
-            if ($user->role === 'Admin' || $user->role === 'admin') {
-                return redirect()->intended('/admin/dashboard');
-            } elseif ($user->role === 'Inventory Manager') {
-                return redirect()->intended('/inventory-manager/dashboard');
-            } elseif ($user->role === 'Production Manager') {
-                return redirect()->intended('/production-manager/dashboard');
+            if ($user->status !== 'active') {
+                Auth::logout();
+                return Redirect::back()->withErrors(['email' => 'Your account is not active. Please contact the administrator.']);
             } else {
-                return redirect()->intended('/buyer/dashboard');
+                if ($user->role === 'Admin' || $user->role === 'admin') {
+                    return redirect()->intended('/admin/dashboard');
+                } elseif ($user->role === 'Inventory Manager') {
+                    return redirect()->intended('/inventory-manager/dashboard');
+                } elseif ($user->role === 'Production Manager') {
+                    return redirect()->intended('/production-manager/dashboard');
+                } else {
+                    return redirect()->intended('/buyer/dashboard');
+                }
             }
+
         }
         throw ValidationException::withMessages([
             'email' => 'The provided credentials do not match our records.',
@@ -48,10 +54,6 @@ class AuthController extends Controller
     {
         return Inertia::render('auth/Registration');
     }
-
-    /**
-     * নতুন বায়ার রেজিস্ট্রেশন করার জন্য
-     */
     public function register(Request $request)
     {
         $request->validate([
@@ -61,8 +63,6 @@ class AuthController extends Controller
             'company_name' => 'nullable|string|max:255',
             'phone' => 'nullable|string|max:20',
         ]);
-
-        // ১. ইউজার তৈরি করা (স্ট্যাটাস ডিফল্টভাবে pending থাকবে)
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -79,14 +79,8 @@ class AuthController extends Controller
             'user_id' => $user->id,
             'is_read' => false,
         ]);
-
-        // ৩. রেজিস্ট্রেশনের পর লগইন না করিয়ে মেসেজসহ রিডাইরেক্ট করা
         return redirect()->route('home')->with('success', 'Your request has been sent! Please wait for admin approval.');
     }
-
-    /**
-     * লগআউট করার জন্য
-     */
     public function logout(Request $request)
     {
         Auth::logout();

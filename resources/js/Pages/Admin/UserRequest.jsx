@@ -28,6 +28,7 @@ function UserRequest({ buyerRequests }) {
                     onSuccess: () => toast.success("Buyer Activated!"),
                 },
             );
+            console.log(id);
         }
     };
     const handleReject = (id) => {

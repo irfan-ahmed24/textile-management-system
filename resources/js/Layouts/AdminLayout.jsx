@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 
 export default function AdminLayout({ children, header }) {
-    // Inertia Shared Props থেকে নোটিফিকেশন ডাটা নেওয়া
     const { notifications = [] } = usePage().props;
 
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -43,9 +42,7 @@ export default function AdminLayout({ children, header }) {
             {},
             {
                 preserveScroll: true,
-                onSuccess: () => {
-                    // এটি inertia props থেকে আসায় অটোমেটিক লিস্ট থেকে চলে যাবে
-                },
+                onSuccess: () => {},
             },
         );
     };
