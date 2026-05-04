@@ -28,8 +28,8 @@ function LowStock({ dbLowStockItems = [], recentRestock = [] }) {
                     </p>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    {/* Items List */}
+                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
+                    {/* Items List (Left Side - 3 Columns) */}
                     <div className="lg:col-span-3 space-y-4">
                         {dbLowStockItems.length > 0 ? (
                             dbLowStockItems.map((item, index) => (
@@ -94,7 +94,6 @@ function LowStock({ dbLowStockItems = [], recentRestock = [] }) {
                                                     {item.last_out}
                                                 </p>
                                             </div>
-                                            {/* সরাসরি স্টক ইন পেজে যাওয়ার জন্য বাটন */}
                                             <Link
                                                 href={route(
                                                     "inventory.stockIn",
@@ -124,7 +123,7 @@ function LowStock({ dbLowStockItems = [], recentRestock = [] }) {
                         )}
                     </div>
 
-                    {/* Sidebar Stats */}
+                    {/* Report Summary Card (Right Side - 1 Column) */}
                     <div className="space-y-6">
                         <div className="bg-amber-500/5 border border-amber-500/20 rounded-[2.5rem] p-8 shadow-xl">
                             <TrendingDown
@@ -143,34 +142,56 @@ function LowStock({ dbLowStockItems = [], recentRestock = [] }) {
                                 stock to avoid production delays.
                             </p>
                         </div>
+                    </div>
+                </div>
 
-                        <div className="bg-[#0F1219]/80 border border-white/5 rounded-[2.5rem] p-8 shadow-2xl">
-                            <h4 className="text-white font-black uppercase text-xs tracking-[0.2em] mb-6 flex items-center gap-2">
-                                <History size={16} className="text-blue-500" />{" "}
-                                Recent Restock
-                            </h4>
-                            <div className="space-y-4">
-                                {recentRestock.length > 0 ? (
-                                    recentRestock.map((log, i) => (
-                                        <div
-                                            key={i}
-                                            className="border-l-2 border-blue-500/30 pl-4 py-1"
-                                        >
-                                            <p className="text-white text-xs font-bold uppercase truncate">
+                {/* --- Recent Restock Section (Full Width Grid) --- */}
+                <div className="mt-12">
+                    <h4 className="text-white font-black uppercase text-xs tracking-[0.2em] mb-6 flex items-center gap-2">
+                        <History size={16} className="text-blue-500" /> Recent
+                        Restock History
+                    </h4>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {recentRestock.length > 0 ? (
+                            recentRestock.map((log, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="bg-[#0F1219]/80 border border-white/5 rounded-3xl p-5 shadow-lg group hover:border-blue-500/30 transition-all"
+                                >
+                                    <div className="flex justify-between items-center">
+                                        <div className="border-l-2 border-blue-500/50 pl-4">
+                                            <p className="text-white text-sm font-black uppercase truncate group-hover:text-blue-400 transition-colors">
                                                 {log.name}
                                             </p>
-                                            <p className="text-blue-500 text-[10px] font-black uppercase mt-1">
-                                                {log.qty_added}
-                                            </p>
+                                            <div className="flex items-center gap-3 mt-1">
+                                                <p className="text-blue-500 text-[11px] font-black uppercase">
+                                                    +{log.qty_added}
+                                                </p>
+                                                <span className="text-slate-600 text-[9px] font-bold uppercase">
+                                                    {log.date || "Just now"}
+                                                </span>
+                                            </div>
                                         </div>
-                                    ))
-                                ) : (
-                                    <p className="text-slate-600 text-[10px] font-bold uppercase">
-                                        No recent activity
-                                    </p>
-                                )}
+                                        <div className="bg-blue-500/5 p-2 rounded-xl border border-blue-500/10">
+                                            <RefreshCcw
+                                                size={14}
+                                                className="text-blue-500/50"
+                                            />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))
+                        ) : (
+                            <div className="col-span-full py-10 bg-white/[0.02] border border-white/5 rounded-[2rem] text-center">
+                                <p className="text-slate-600 text-[10px] font-bold uppercase tracking-widest">
+                                    No recent activity recorded
+                                </p>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
             </div>

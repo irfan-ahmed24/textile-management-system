@@ -27,10 +27,6 @@ class StockInController extends Controller
             'recentEntries' => $recentEntries
         ]);
     }
-
-    /**
-     * নতুন স্টক ইনপুট এবং ব্যালেন্স আপডেট করা
-     */
     public function store(Request $request)
     {
         // ১. ইনপুট ভ্যালিডেশন

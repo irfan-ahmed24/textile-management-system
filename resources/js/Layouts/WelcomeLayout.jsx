@@ -57,7 +57,7 @@ export default function WelcomeLayout({ children }) {
                             <Factory size={22} className="text-white" />
                         </div>
                         <span className="text-xl font-bold tracking-tight text-white">
-                            Textile<span className="text-blue-500">MS</span>
+                            TexEurop<span className="text-blue-500">BD</span>
                         </span>
                     </button>
 

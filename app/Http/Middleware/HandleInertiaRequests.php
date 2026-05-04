@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -31,8 +32,25 @@ class HandleInertiaRequests extends Middleware
     {
         return [
             ...parent::share($request),
+
+            // ১. ইউজার অথেন্টিকেশন ডাটা
             'auth' => [
                 'user' => $request->user(),
+            ],
+
+            // ২. নোটিফিকেশন লজিক (শুধুমাত্র অ্যাডমিন আনরিড নোটিফিকেশন দেখতে পাবে)
+            'notifications' => function () use ($request) {
+                if (!$request->user() || !in_array($request->user()->role, ['Admin', 'admin'])) {
+                    return [];
+                }
+                return Notification::where('is_read', false)
+                    ->latest()
+                    ->get();
+            },
+
+            'flash' => [
+                'success' => fn() => $request->session()->get('success'),
+                'error' => fn() => $request->session()->get('error'),
             ],
         ];
     }

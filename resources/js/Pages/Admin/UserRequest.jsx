@@ -1,7 +1,8 @@
 import React from "react";
 import AdminLayout from "@/Layouts/AdminLayout";
-import { Head } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react"; // router ইম্পোর্ট করা হয়েছে
 import { motion } from "framer-motion";
+import toast, { Toaster } from "react-hot-toast"; // নোটিফিকেশনের জন্য
 import {
     UserPlus,
     Check,
@@ -14,41 +15,34 @@ import {
     ArrowUpRight,
 } from "lucide-react";
 
-function UserRequest() {
-    // ডামি ডাটা: যারা বায়ার হওয়ার জন্য রিকোয়েস্ট পাঠিয়েছে
-    const buyerRequests = [
-        {
-            id: 1,
-            name: "Tanvir Rahman",
-            email: "tanvir@example.com",
-            phone: "+880 17XX-XXXXXX",
-            company: "Fashion Tex Ltd.",
-            date: "22 Apr, 2026",
-            status: "Pending",
-        },
-        {
-            id: 2,
-            name: "Mahmudul Hasan",
-            email: "mahmud@global.com",
-            phone: "+880 18XX-XXXXXX",
-            company: "Style Hub",
-            date: "21 Apr, 2026",
-            status: "Pending",
-        },
-        {
-            id: 3,
-            name: "Sultana Kamal",
-            email: "sultana@fab.com",
-            phone: "+880 19XX-XXXXXX",
-            company: "Eco Fabrics BD",
-            date: "20 Apr, 2026",
-            status: "Pending",
-        },
-    ];
+function UserRequest({ buyerRequests }) {
+    // props হিসেবে ডাটা গ্রহণ
+
+    // অ্যাপ্রুভ হ্যান্ডলার
+    const handleApprove = (id) => {
+        if (confirm("Are you sure you want to approve this buyer?")) {
+            router.patch(
+                route("admin.user-requests.approve", id),
+                {},
+                {
+                    onSuccess: () => toast.success("Buyer Activated!"),
+                },
+            );
+            console.log(id);
+        }
+    };
+    const handleReject = (id) => {
+        if (confirm("Reject this request?")) {
+            router.delete(route("admin.user-requests.reject", id), {
+                onSuccess: () => toast.error("Request Removed"),
+            });
+        }
+    };
 
     return (
         <AdminLayout>
             <Head title="Buyer Requests | Admin" />
+            <Toaster position="top-right" />
 
             <div className="p-6 max-w-[1400px] mx-auto">
                 {/* Header Section */}
@@ -75,7 +69,7 @@ function UserRequest() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: i * 0.1 }}
-                            className="bg-[#0F1219]/80 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-xl shadow-2xl group hover:border-indigo-500/30 transition-all duration-500"
+                            className="bg-[#0F1219]/80 border border-white/5 rounded-[2.5rem] p-8 backdrop-blur-xl shadow-2xl group hover:border-indigo-500/30 transition-all duration-500 relative"
                         >
                             {/* User Profile Header */}
                             <div className="flex items-center gap-4 mb-8">
@@ -105,26 +99,34 @@ function UserRequest() {
                                 <DetailItem
                                     icon={<Phone size={14} />}
                                     label="Contact No"
-                                    value={request.phone}
+                                    value={request.phone || "N/A"}
                                 />
                                 <DetailItem
                                     icon={<Building2 size={14} />}
                                     label="Company / Brand"
-                                    value={request.company}
+                                    value={request.company_name || "N/A"}
                                 />
                                 <DetailItem
                                     icon={<Calendar size={14} />}
                                     label="Request Date"
-                                    value={request.date}
+                                    value={new Date(
+                                        request.created_at,
+                                    ).toLocaleDateString()}
                                 />
                             </div>
 
                             {/* Action Buttons */}
                             <div className="flex gap-4">
-                                <button className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase text-[10px] tracking-widest">
+                                <button
+                                    onClick={() => handleApprove(request.id)}
+                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-2xl shadow-lg shadow-emerald-600/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2 uppercase text-[10px] tracking-widest"
+                                >
                                     <Check size={16} /> Approve Buyer
                                 </button>
-                                <button className="bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white px-5 py-4 rounded-2xl border border-red-500/10 transition-all active:scale-[0.98]">
+                                <button
+                                    onClick={() => handleReject(request.id)}
+                                    className="bg-red-600/10 hover:bg-red-600 text-red-500 hover:text-white px-5 py-4 rounded-2xl border border-red-500/10 transition-all active:scale-[0.98]"
+                                >
                                     <X size={20} />
                                 </button>
                             </div>
@@ -138,7 +140,7 @@ function UserRequest() {
                     ))}
                 </div>
 
-                {/* Empty State (If no requests) */}
+                {/* Empty State */}
                 {buyerRequests.length === 0 && (
                     <div className="text-center py-20 bg-[#0F1219]/40 border border-dashed border-white/10 rounded-[3rem]">
                         <p className="text-slate-600 font-black uppercase tracking-widest">

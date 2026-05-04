@@ -5,11 +5,12 @@ import SystemActivityLog from "@/Components/Admin/Dashboard/SystemActivityLog";
 import StockOverviewCard from "@/Components/Admin/Dashboard/StockOverviewCard";
 import { Users, DollarSign, Activity, ShieldAlert } from "lucide-react";
 
-function Dashboard() {
+function Dashboard({ dbStats, dbActivities, dbStocks }) {
+    // কন্ট্রোলার থেকে আসা ডাটা দিয়ে স্ট্যাটাস অ্যারে তৈরি
     const adminStats = [
         {
             label: "Total Revenue",
-            value: "$54,230",
+            value: `$${dbStats.total_revenue.toLocaleString()}`,
             icon: DollarSign,
             color: "text-emerald-500",
             bg: "bg-emerald-500/10",
@@ -18,7 +19,7 @@ function Dashboard() {
         },
         {
             label: "Total Users",
-            value: "1,240",
+            value: dbStats.total_users.toLocaleString(),
             icon: Users,
             color: "text-indigo-500",
             bg: "bg-indigo-500/10",
@@ -27,7 +28,7 @@ function Dashboard() {
         },
         {
             label: "Pending Approvals",
-            value: "08",
+            value: dbStats.pending_approvals.toString().padStart(2, "0"),
             icon: ShieldAlert,
             color: "text-amber-500",
             bg: "bg-amber-500/10",
@@ -36,7 +37,7 @@ function Dashboard() {
         },
         {
             label: "Active Production",
-            value: "12",
+            value: dbStats.active_production.toString(),
             icon: Activity,
             color: "text-blue-500",
             bg: "bg-blue-500/10",
@@ -45,49 +46,17 @@ function Dashboard() {
         },
     ];
 
-    const activityItems = [
-        {
-            user: "Irfan Ahmed",
-            action: "Placed a new order #TX-902",
-            time: "2 mins ago",
-        },
-        {
-            user: "Inventory Manager",
-            action: "Stock updated: 500kg Cotton Yarn",
-            time: "45 mins ago",
-        },
-        {
-            user: "System",
-            action: "Backup completed successfully",
-            time: "2 hours ago",
-        },
-    ];
-
-    const stockItems = [
-        {
-            name: "Cotton Yarn",
-            level: 85,
-            color: "bg-emerald-500",
-        },
-        {
-            name: "Chemicals",
-            level: 40,
-            color: "bg-amber-500",
-        },
-        {
-            name: "Grey Fabric",
-            level: 92,
-            color: "bg-indigo-500",
-        },
-    ];
-
     return (
         <AdminLayout header="System Overview">
+            {/* ডায়নামিক স্ট্যাটাস গ্রিড */}
             <StatsGrid stats={adminStats} />
 
             <div className="grid lg:grid-cols-3 gap-8">
-                <SystemActivityLog items={activityItems} />
-                <StockOverviewCard stocks={stockItems} />
+                {/* ডাটাবেস থেকে আসা রিসেন্ট অ্যাক্টিভিটি */}
+                <SystemActivityLog items={dbActivities} />
+
+                {/* ডাটাবেস থেকে আসা স্টক লেভেল */}
+                <StockOverviewCard stocks={dbStocks} />
             </div>
         </AdminLayout>
     );

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, usePage } from "@inertiajs/react";
+import { Link, usePage, router } from "@inertiajs/react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
     LayoutDashboard,
@@ -11,19 +11,21 @@ import {
     Menu,
     X,
     Bell,
-    Search,
     Factory,
     Database,
     FileBarChart,
     ChevronDown,
+    Check,
+    Clock,
 } from "lucide-react";
 
 export default function AdminLayout({ children, header }) {
+    const { notifications = [] } = usePage().props;
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
-    const [isSearchOpen, setIsSearchOpen] = useState(false);
 
     useEffect(() => {
         const handleResize = () => {
@@ -34,23 +36,17 @@ export default function AdminLayout({ children, header }) {
         handleResize();
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+    const markAsRead = (id) => {
+        router.patch(
+            route("admin.notification.read", id),
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {},
+            },
+        );
+    };
 
-    const notifications = [
-        {
-            id: 1,
-            title: "New Order",
-            desc: "Order #TX-902 received.",
-            time: "2m ago",
-        },
-        {
-            id: 2,
-            title: "Stock Alert",
-            desc: "Chemical stock is low.",
-            time: "1h ago",
-        },
-    ];
-
-    // এখানে আমরা route গুলো আপডেট করে দিয়েছি
     const navigation = [
         { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
         {
@@ -58,11 +54,7 @@ export default function AdminLayout({ children, header }) {
             href: "/admin/user-management",
             icon: Users,
         },
-        {
-            name: "User Requests",
-            href: "/admin/user-requests",
-            icon: Users,
-        },
+        { name: "User Requests", href: "/admin/user-requests", icon: Users },
         {
             name: "Inventory Reports",
             href: "/admin/Inventory_Report",
@@ -112,10 +104,6 @@ export default function AdminLayout({ children, header }) {
                     <Link
                         key={item.name}
                         href={item.href}
-                        onClick={() =>
-                            window.innerWidth < 1024 &&
-                            setIsMobileMenuOpen(false)
-                        }
                         className={`flex items-center px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-300 group ${
                             window.location.pathname === item.href
                                 ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20"
@@ -164,11 +152,6 @@ export default function AdminLayout({ children, header }) {
                             initial={{ x: "-100%" }}
                             animate={{ x: 0 }}
                             exit={{ x: "-100%" }}
-                            transition={{
-                                type: "spring",
-                                damping: 25,
-                                stiffness: 200,
-                            }}
                             className="fixed inset-y-0 left-0 z-[110] w-72 bg-[#080B11] flex flex-col lg:hidden"
                         >
                             <SidebarContent />
@@ -201,7 +184,7 @@ export default function AdminLayout({ children, header }) {
                             className="p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 hover:text-indigo-500 transition-all"
                             onClick={() =>
                                 isSidebarOpen
-                                    ? setIsSidebarOpen(!isSidebarOpen)
+                                    ? setIsSidebarOpen(false)
                                     : window.innerWidth < 1024
                                       ? setIsMobileMenuOpen(true)
                                       : setIsSidebarOpen(true)
@@ -221,31 +204,21 @@ export default function AdminLayout({ children, header }) {
                         </h1>
                     </div>
 
-                    <div className="flex items-center gap-3 sm:gap-6">
-                        <div className="relative flex items-center">
-                            <AnimatePresence>
-                                {isSearchOpen && (
-                                    <motion.input
-                                        initial={{ width: 0, opacity: 0 }}
-                                        animate={{ width: 200, opacity: 1 }}
-                                        exit={{ width: 0, opacity: 0 }}
-                                        className="bg-white/5 border border-white/10 rounded-xl px-4 py-1.5 text-sm mr-2 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                                        placeholder="Search..."
-                                    />
-                                )}
-                            </AnimatePresence>
-                        </div>
-
+                    <div className="flex items-center gap-6">
+                        {/* Notification Bell */}
                         <div className="relative">
                             <button
                                 onClick={() =>
                                     setIsNotificationsOpen(!isNotificationsOpen)
                                 }
-                                className={`p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 relative hover:text-indigo-400 transition-colors ${isNotificationsOpen ? "bg-indigo-600/10 border-indigo-500/50" : ""}`}
+                                className={`p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 relative hover:text-indigo-400 transition-colors ${isNotificationsOpen ? "bg-indigo-600/10 border-indigo-500/50 text-indigo-400" : ""}`}
                             >
                                 <Bell size={20} />
-                                <span className="absolute top-2.5 right-2.5 h-2 w-2 bg-indigo-500 rounded-full ring-2 ring-[#080B11]"></span>
+                                {notifications.length > 0 && (
+                                    <span className="absolute top-2.5 right-2.5 h-2.5 w-2.5 bg-red-500 rounded-full border-2 border-[#080B11] animate-pulse"></span>
+                                )}
                             </button>
+
                             <AnimatePresence>
                                 {isNotificationsOpen && (
                                     <>
@@ -256,31 +229,92 @@ export default function AdminLayout({ children, header }) {
                                             }
                                         ></div>
                                         <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            className="absolute right-0 mt-3 w-80 bg-[#080B11] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                                            initial={{
+                                                opacity: 0,
+                                                y: 10,
+                                                scale: 0.95,
+                                            }}
+                                            animate={{
+                                                opacity: 1,
+                                                y: 0,
+                                                scale: 1,
+                                            }}
+                                            exit={{
+                                                opacity: 0,
+                                                y: 10,
+                                                scale: 0.95,
+                                            }}
+                                            className="absolute right-0 mt-3 w-80 bg-[#0F1219] border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden backdrop-blur-xl"
                                         >
-                                            <div className="p-4 border-b border-white/5 font-bold text-sm">
-                                                Notifications
+                                            <div className="p-4 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                                                <span className="font-bold text-xs uppercase tracking-widest text-slate-200">
+                                                    Notifications
+                                                </span>
+                                                <span className="bg-indigo-500/20 text-indigo-400 text-[10px] px-2 py-0.5 rounded-full font-bold">
+                                                    {notifications.length} New
+                                                </span>
                                             </div>
-                                            <div className="max-h-60 overflow-y-auto">
-                                                {notifications.map((n) => (
-                                                    <div
-                                                        key={n.id}
-                                                        className="p-4 border-b border-white/5 hover:bg-white/5 transition cursor-pointer"
-                                                    >
-                                                        <p className="text-sm font-bold text-slate-200">
-                                                            {n.title}
-                                                        </p>
-                                                        <p className="text-xs text-slate-500 mt-1">
-                                                            {n.desc}
-                                                        </p>
-                                                        <p className="text-[10px] text-slate-600 mt-2 font-bold uppercase tracking-widest">
-                                                            {n.time}
+                                            <div className="max-h-80 overflow-y-auto custom-scrollbar">
+                                                {notifications.length > 0 ? (
+                                                    notifications.map((n) => (
+                                                        <div
+                                                            key={n.id}
+                                                            className="p-4 border-b border-white/5 hover:bg-white/5 transition group relative"
+                                                        >
+                                                            <div className="flex justify-between items-start gap-3">
+                                                                <div className="flex-1">
+                                                                    <p className="text-sm font-medium text-slate-200 leading-snug">
+                                                                        {
+                                                                            n.message
+                                                                        }
+                                                                    </p>
+                                                                    <div className="flex items-center gap-1.5 mt-2 text-slate-500">
+                                                                        <Clock
+                                                                            size={
+                                                                                12
+                                                                            }
+                                                                        />
+                                                                        <span className="text-[10px] font-medium italic">
+                                                                            {new Date(
+                                                                                n.created_at,
+                                                                            ).toLocaleString()}
+                                                                        </span>
+                                                                    </div>
+                                                                </div>
+                                                                <button
+                                                                    onClick={(
+                                                                        e,
+                                                                    ) => {
+                                                                        e.stopPropagation();
+                                                                        markAsRead(
+                                                                            n.id,
+                                                                        );
+                                                                    }}
+                                                                    className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-500 hover:text-white"
+                                                                    title="Mark as read"
+                                                                >
+                                                                    <Check
+                                                                        size={
+                                                                            14
+                                                                        }
+                                                                    />
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div className="p-10 text-center">
+                                                        <div className="bg-white/5 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                                                            <Bell
+                                                                size={20}
+                                                                className="text-slate-600"
+                                                            />
+                                                        </div>
+                                                        <p className="text-slate-600 text-xs font-bold uppercase tracking-widest">
+                                                            No new alerts
                                                         </p>
                                                     </div>
-                                                ))}
+                                                )}
                                             </div>
                                         </motion.div>
                                     </>
@@ -288,6 +322,7 @@ export default function AdminLayout({ children, header }) {
                             </AnimatePresence>
                         </div>
 
+                        {/* Profile Menu */}
                         <div className="relative">
                             <div
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -342,6 +377,7 @@ export default function AdminLayout({ children, header }) {
                         </div>
                     </div>
                 </header>
+
                 <main className="flex-1 overflow-y-auto p-4 lg:p-10 custom-scrollbar bg-[#0F1219]">
                     {children}
                 </main>

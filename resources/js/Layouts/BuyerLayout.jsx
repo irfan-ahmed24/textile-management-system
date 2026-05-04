@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Link } from "@inertiajs/react";
+import { Link, usePage, router } from "@inertiajs/react"; // usePage এবং router যোগ করা হয়েছে
 import { motion, AnimatePresence } from "framer-motion";
 import {
     LayoutDashboard,
@@ -15,14 +15,19 @@ import {
     Factory,
     Settings,
     ChevronDown,
+    Clock,
+    Check,
 } from "lucide-react";
 
 export default function BuyerLayout({ children, header }) {
+    // ডাটাবেস থেকে আসা ইউজার এবং নোটিফিকেশন ডাটা ধরা
+    const { auth, notifications = [] } = usePage().props;
+    const user = auth.user;
+
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-    // ড্রপডাউন বাইরে ক্লিক করলে বন্ধ হওয়ার জন্য রেফারেন্স
     const notificationRef = useRef(null);
     const profileRef = useRef(null);
 
@@ -45,6 +50,17 @@ export default function BuyerLayout({ children, header }) {
         return () =>
             document.removeEventListener("mousedown", handleClickOutside);
     }, []);
+
+    // নোটিফিকেশন পড়া হয়েছে হিসেবে মার্ক করার ফাংশন
+    const markAsRead = (id) => {
+        router.patch(
+            route("admin.notification.read", id),
+            {},
+            {
+                preserveScroll: true,
+            },
+        );
+    };
 
     const navigation = [
         { name: "Dashboard", href: "/buyer/dashboard", icon: LayoutDashboard },
@@ -94,9 +110,10 @@ export default function BuyerLayout({ children, header }) {
                                         />
                                     </div>
                                     <span className="text-xl font-bold tracking-tight text-white whitespace-nowrap">
-                                        Textile
+                                        TexEurop
                                         <span className="text-blue-500">
-                                            MS
+                                            {" "}
+                                            BD
                                         </span>
                                     </span>
                                 </div>
@@ -134,7 +151,6 @@ export default function BuyerLayout({ children, header }) {
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                onClick={() => setIsSidebarOpen(false)}
                                 className={`flex items-center h-12 rounded-xl transition-all duration-300 group relative ${
                                     isActive
                                         ? "bg-blue-600/10 text-blue-500 border border-blue-500/20"
@@ -193,7 +209,7 @@ export default function BuyerLayout({ children, header }) {
                     </div>
 
                     <div className="flex items-center gap-4 lg:gap-6 ml-auto">
-                        {/* Notification Dropdown */}
+                        {/* Notification Dropdown (Dynamic) */}
                         <div className="relative" ref={notificationRef}>
                             <button
                                 onClick={() =>
@@ -202,7 +218,9 @@ export default function BuyerLayout({ children, header }) {
                                 className={`p-2.5 rounded-xl border transition-all relative ${isNotificationsOpen ? "bg-blue-600/10 text-blue-500 border-blue-500/20" : "text-slate-400 bg-white/5 border-white/10 hover:text-blue-500"}`}
                             >
                                 <Bell size={20} />
-                                <span className="absolute top-2.5 right-2.5 block h-2 w-2 rounded-full bg-blue-500 ring-2 ring-[#080B11]"></span>
+                                {notifications.length > 0 && (
+                                    <span className="absolute top-2.5 right-2.5 block h-2 w-2 rounded-full bg-blue-500 ring-2 ring-[#080B11] animate-pulse"></span>
+                                )}
                             </button>
 
                             <AnimatePresence>
@@ -226,68 +244,78 @@ export default function BuyerLayout({ children, header }) {
                                                 Notifications
                                             </h3>
                                             <span className="text-[10px] font-black uppercase text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded">
-                                                3 New
+                                                {notifications.length} New
                                             </span>
                                         </div>
                                         <div className="max-h-[400px] overflow-y-auto no-scrollbar">
-                                            {[
-                                                {
-                                                    title: "Order Shipped",
-                                                    desc: "Your order #TX-9021 has been shipped.",
-                                                    time: "2 mins ago",
-                                                },
-                                                {
-                                                    title: "Payment Successful",
-                                                    desc: "Payment for Invoice #INV-2024 has been verified.",
-                                                    time: "1 hour ago",
-                                                },
-                                                {
-                                                    title: "In Production",
-                                                    desc: "Cotton Twill fabric is now in Dyeing stage.",
-                                                    time: "5 hours ago",
-                                                },
-                                            ].map((n, i) => (
-                                                <div
-                                                    key={i}
-                                                    className="p-4 border-b border-white/5 hover:bg-white/[0.02] cursor-pointer transition-colors group"
-                                                >
-                                                    <div className="flex justify-between items-start mb-1">
-                                                        <h4 className="text-sm font-bold text-slate-200 group-hover:text-blue-500 transition-colors">
-                                                            {n.title}
-                                                        </h4>
-                                                        <span className="text-[10px] text-slate-500 font-medium">
-                                                            {n.time}
-                                                        </span>
+                                            {notifications.length > 0 ? (
+                                                notifications.map((n) => (
+                                                    <div
+                                                        key={n.id}
+                                                        className="p-4 border-b border-white/5 hover:bg-white/[0.02] cursor-pointer transition-colors group relative"
+                                                    >
+                                                        <div className="flex justify-between items-start gap-3">
+                                                            <div className="flex-1">
+                                                                <h4 className="text-sm font-bold text-slate-200 group-hover:text-blue-500 transition-colors leading-tight">
+                                                                    {n.message}
+                                                                </h4>
+                                                                <div className="flex items-center gap-1.5 mt-2 text-slate-500">
+                                                                    <Clock
+                                                                        size={
+                                                                            10
+                                                                        }
+                                                                    />
+                                                                    <span className="text-[10px] font-medium">
+                                                                        {new Date(
+                                                                            n.created_at,
+                                                                        ).toLocaleString()}
+                                                                    </span>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                onClick={(
+                                                                    e,
+                                                                ) => {
+                                                                    e.stopPropagation();
+                                                                    markAsRead(
+                                                                        n.id,
+                                                                    );
+                                                                }}
+                                                                className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity hover:bg-emerald-500 hover:text-white"
+                                                            >
+                                                                <Check
+                                                                    size={14}
+                                                                />
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                    <p className="text-xs text-slate-400 leading-relaxed">
-                                                        {n.desc}
-                                                    </p>
+                                                ))
+                                            ) : (
+                                                <div className="p-10 text-center text-slate-600 text-xs font-bold uppercase tracking-widest">
+                                                    No new notifications
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
-                                        <button className="w-full py-4 text-xs font-bold text-blue-500 hover:bg-blue-500/5 transition-all uppercase tracking-widest">
-                                            View All Notifications
-                                        </button>
                                     </motion.div>
                                 )}
                             </AnimatePresence>
                         </div>
 
-                        {/* User Profile Dropdown */}
+                        {/* User Profile Dropdown (Dynamic) */}
                         <div className="relative" ref={profileRef}>
                             <button
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                                 className={`flex items-center gap-3 p-1.5 rounded-2xl border transition-all ${isProfileOpen ? "bg-white/10 border-blue-500/50" : "bg-white/5 border-white/10 hover:border-white/20"}`}
                             >
-                                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shrink-0 shadow-lg shadow-blue-600/20 text-sm">
-                                    IA
+                                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center font-bold text-white shrink-0 shadow-lg shadow-blue-600/20 text-sm uppercase">
+                                    {user.name.substring(0, 2)}
                                 </div>
                                 <div className="hidden sm:block text-left mr-1">
                                     <p className="text-xs font-bold text-slate-200 leading-none mb-1">
-                                        Irfan Ahmed
+                                        {user.name}
                                     </p>
                                     <span className="text-[9px] font-black uppercase text-blue-400 tracking-tighter">
-                                        Buyer Account
+                                        {user.role} Account
                                     </span>
                                 </div>
                                 <ChevronDown
@@ -313,7 +341,7 @@ export default function BuyerLayout({ children, header }) {
                                         className="absolute right-0 mt-4 w-56 bg-[#080B11] border border-white/5 rounded-2xl shadow-2xl z-[100] overflow-hidden p-2"
                                     >
                                         <Link
-                                            href="/profile/edit"
+                                            href="/buyer/profile"
                                             className="flex items-center gap-3 px-4 py-3 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all group"
                                         >
                                             <User
@@ -325,7 +353,7 @@ export default function BuyerLayout({ children, header }) {
                                             </span>
                                         </Link>
                                         <Link
-                                            href="/settings"
+                                            href="/buyer/settings"
                                             className="flex items-center gap-3 px-4 py-3 text-sm text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all group"
                                         >
                                             <Settings

@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+use App\Http\Controllers\AuthController;
+
 Route::get('/', function () {
     if (Auth::check()) {
         $user = Auth::user();
@@ -20,9 +22,9 @@ Route::get('/', function () {
 })->name('home');
 
 
-Route::get('/register', function () {
-    return Inertia::render('auth/Registration');
-})->name('register');
+
+Route::get('/register', [AuthController::class, 'showRegister'])->name('register.show');
+Route::post('/register', [AuthController::class, 'register'])->name('register.perform');
 
 
 require __DIR__ . '/auth.php';
