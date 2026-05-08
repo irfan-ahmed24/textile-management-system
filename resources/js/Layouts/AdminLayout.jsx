@@ -36,6 +36,7 @@ export default function AdminLayout({ children, header }) {
         handleResize();
         return () => window.removeEventListener("resize", handleResize);
     }, []);
+
     const markAsRead = (id) => {
         router.patch(
             route("admin.notification.read", id),
@@ -91,6 +92,7 @@ export default function AdminLayout({ children, header }) {
                         </span>
                     )}
                 </div>
+                {/* Mobile Close Button */}
                 <button
                     className="lg:hidden text-slate-500"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -99,7 +101,22 @@ export default function AdminLayout({ children, header }) {
                 </button>
             </div>
 
-            <nav className="mt-8 px-3 flex-1 space-y-1.5 overflow-y-auto custom-scrollbar">
+            {/* Desktop Menu Toggle Button Inside Sidebar */}
+            <div
+                className={`hidden lg:flex px-4 mt-4 ${isSidebarOpen ? "justify-end" : "justify-center"}`}
+            >
+                <button
+                    onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                    className="p-2 text-slate-400 bg-white/5 rounded-xl border border-white/10 hover:text-indigo-500 transition-all"
+                >
+                    <Menu
+                        size={20}
+                        className={!isSidebarOpen ? "rotate-180" : ""}
+                    />
+                </button>
+            </div>
+
+            <nav className="mt-4 px-3 flex-1 space-y-1.5 overflow-y-auto custom-scrollbar">
                 {navigation.map((item) => (
                     <Link
                         key={item.name}
@@ -108,7 +125,7 @@ export default function AdminLayout({ children, header }) {
                             window.location.pathname === item.href
                                 ? "bg-indigo-600/10 text-indigo-400 border border-indigo-500/20"
                                 : "text-slate-500 hover:text-slate-200 hover:bg-white/5 border border-transparent"
-                        }`}
+                        } ${!isSidebarOpen && window.innerWidth >= 1024 ? "justify-center" : ""}`}
                     >
                         <item.icon className="flex-shrink-0" size={20} />
                         {(isSidebarOpen || window.innerWidth < 1024) && (
@@ -125,7 +142,7 @@ export default function AdminLayout({ children, header }) {
                     href="/logout"
                     method="post"
                     as="button"
-                    className="flex items-center w-full px-4 py-3 text-sm font-bold text-slate-500 hover:text-red-400 transition-all rounded-xl hover:bg-red-500/5"
+                    className={`flex items-center w-full px-4 py-3 text-sm font-bold text-slate-500 hover:text-red-400 transition-all rounded-xl hover:bg-red-500/5 ${!isSidebarOpen && window.innerWidth >= 1024 ? "justify-center" : ""}`}
                 >
                     <LogOut className="flex-shrink-0" size={20} />
                     {(isSidebarOpen || window.innerWidth < 1024) && (
@@ -152,6 +169,11 @@ export default function AdminLayout({ children, header }) {
                             initial={{ x: "-100%" }}
                             animate={{ x: 0 }}
                             exit={{ x: "-100%" }}
+                            transition={{
+                                type: "spring",
+                                damping: 25,
+                                stiffness: 200,
+                            }}
                             className="fixed inset-y-0 left-0 z-[110] w-72 bg-[#080B11] flex flex-col lg:hidden"
                         >
                             <SidebarContent />
@@ -180,24 +202,12 @@ export default function AdminLayout({ children, header }) {
             >
                 <header className="bg-[#080B11]/80 backdrop-blur-md border-b border-white/5 h-20 flex items-center justify-between px-4 lg:px-10 sticky top-0 z-50">
                     <div className="flex items-center gap-4">
+                        {/* Mobile Only Menu Button */}
                         <button
-                            className="p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 hover:text-indigo-500 transition-all"
-                            onClick={() =>
-                                isSidebarOpen
-                                    ? setIsSidebarOpen(false)
-                                    : window.innerWidth < 1024
-                                      ? setIsMobileMenuOpen(true)
-                                      : setIsSidebarOpen(true)
-                            }
+                            className="lg:hidden p-2.5 text-slate-400 bg-white/5 rounded-xl border border-white/10 hover:text-indigo-500 transition-all"
+                            onClick={() => setIsMobileMenuOpen(true)}
                         >
-                            <Menu
-                                size={24}
-                                className={
-                                    !isSidebarOpen && window.innerWidth >= 1024
-                                        ? "rotate-180"
-                                        : ""
-                                }
-                            />
+                            <Menu size={24} />
                         </button>
                         <h1 className="text-xl font-bold text-white tracking-tight truncate">
                             {header}
@@ -205,7 +215,6 @@ export default function AdminLayout({ children, header }) {
                     </div>
 
                     <div className="flex items-center gap-6">
-                        {/* Notification Bell */}
                         <div className="relative">
                             <button
                                 onClick={() =>
@@ -291,7 +300,6 @@ export default function AdminLayout({ children, header }) {
                                                                         );
                                                                     }}
                                                                     className="p-1.5 bg-emerald-500/10 text-emerald-500 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-emerald-500 hover:text-white"
-                                                                    title="Mark as read"
                                                                 >
                                                                     <Check
                                                                         size={
@@ -303,16 +311,8 @@ export default function AdminLayout({ children, header }) {
                                                         </div>
                                                     ))
                                                 ) : (
-                                                    <div className="p-10 text-center">
-                                                        <div className="bg-white/5 w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                                                            <Bell
-                                                                size={20}
-                                                                className="text-slate-600"
-                                                            />
-                                                        </div>
-                                                        <p className="text-slate-600 text-xs font-bold uppercase tracking-widest">
-                                                            No new alerts
-                                                        </p>
+                                                    <div className="p-10 text-center text-slate-600 text-xs font-bold uppercase tracking-widest">
+                                                        No new alerts
                                                     </div>
                                                 )}
                                             </div>
@@ -322,7 +322,6 @@ export default function AdminLayout({ children, header }) {
                             </AnimatePresence>
                         </div>
 
-                        {/* Profile Menu */}
                         <div className="relative">
                             <div
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}

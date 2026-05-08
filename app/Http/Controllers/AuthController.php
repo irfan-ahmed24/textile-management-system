@@ -29,7 +29,10 @@ class AuthController extends Controller
             $request->session()->regenerate();
             $user = Auth::user();
 
-            if ($user->status !== 'active') {
+            $NotActive = strtolower($user->status) !== 'active';
+
+
+            if ($NotActive) {
                 Auth::logout();
                 return Redirect::back()->withErrors(['email' => 'Your account is not active. Please contact the administrator.']);
             } else {

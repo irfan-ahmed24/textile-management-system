@@ -4,47 +4,7 @@ import { Head } from "@inertiajs/react";
 import { motion } from "framer-motion";
 import { Activity, Clock } from "lucide-react";
 
-function ProductionOverview() {
-    // প্রোডাকশন ট্র্যাকিং ডাটা
-    const productionOrders = [
-        {
-            id: "ORD-7701",
-            product: "Premium Cotton T-Shirt",
-            total_qty: "5,000 Pcs",
-            stage: "Knitting",
-            progress: 85,
-            status: "Active",
-            deadline: "25 Apr, 2026",
-        },
-        {
-            id: "ORD-8802",
-            product: "Denim Jacket Blue",
-            total_qty: "1,200 Pcs",
-            stage: "Dyeing",
-            progress: 40,
-            status: "Urgent",
-            deadline: "28 Apr, 2026",
-        },
-        {
-            id: "ORD-9903",
-            product: "Polyester Sports Jersey",
-            total_qty: "2,500 Pcs",
-            stage: "Sewing",
-            progress: 15,
-            status: "Delayed",
-            deadline: "22 Apr, 2026",
-        },
-        {
-            id: "ORD-1104",
-            product: "Formal White Shirt",
-            total_qty: "3,000 Pcs",
-            stage: "Finishing",
-            progress: 100,
-            status: "Completed",
-            deadline: "20 Apr, 2026",
-        },
-    ];
-
+function ProductionOverview({ dbOrders, stats }) {
     return (
         <AdminLayout>
             <Head title="Production Tracking | Admin" />
@@ -70,7 +30,7 @@ function ProductionOverview() {
                                     Active Orders
                                 </p>
                                 <p className="text-white font-black text-xl">
-                                    12
+                                    {stats.active}
                                 </p>
                             </div>
                             <div className="w-[1px] h-8 bg-white/10"></div>
@@ -79,7 +39,7 @@ function ProductionOverview() {
                                     Completed
                                 </p>
                                 <p className="text-emerald-500 font-black text-xl">
-                                    84
+                                    {stats.completed}
                                 </p>
                             </div>
                         </div>
@@ -109,7 +69,7 @@ function ProductionOverview() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-white/5">
-                                {productionOrders.map((order) => (
+                                {dbOrders.map((order) => (
                                     <tr
                                         key={order.id}
                                         className="group hover:bg-white/[0.02] transition-colors"
@@ -178,7 +138,6 @@ function ProductionOverview() {
     );
 }
 
-// Status Badge Component
 function StatusBadge({ status }) {
     const styles = {
         Active: "bg-emerald-500/10 text-emerald-500 border-emerald-500/20",
@@ -186,9 +145,12 @@ function StatusBadge({ status }) {
         Delayed: "bg-red-500/10 text-red-500 border-red-500/20",
         Completed: "bg-blue-500/10 text-blue-500 border-blue-500/20",
     };
+    // যদি ডাটাবেসের স্ট্যাটাস কেস-সেনসিটিভ হয় তবে এটি কাজে দিবে
+    const badgeStatus = styles[status] ? status : "Active";
+
     return (
         <span
-            className={`text-[9px] px-3 py-1.5 border rounded-lg font-black uppercase tracking-widest ${styles[status]}`}
+            className={`text-[9px] px-3 py-1.5 border rounded-lg font-black uppercase tracking-widest ${styles[badgeStatus]}`}
         >
             {status}
         </span>

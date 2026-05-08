@@ -49,7 +49,6 @@ export default function StockOutForm({
 
             <form onSubmit={submit} className="space-y-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                    {/* Request ID (New Field) */}
                     <div className="space-y-2">
                         <label className="text-xs font-black text-slate-500 uppercase tracking-widest ml-1">
                             Request ID
@@ -61,7 +60,7 @@ export default function StockOutForm({
                             />
                             <input
                                 type="text"
-                                disabled={!isManual} // ম্যানুয়াল মোড না হলে অফ থাকবে
+                                disabled={!isManual}
                                 value={data.request_id || ""}
                                 onChange={(e) =>
                                     setData("request_id", e.target.value)

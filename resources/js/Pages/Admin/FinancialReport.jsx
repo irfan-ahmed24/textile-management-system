@@ -10,15 +10,13 @@ import {
     DollarSign,
     CreditCard,
     PieChart,
-    Download,
 } from "lucide-react";
 
-function FinancialReport() {
-    // আর্থিক ডাটা সামারি
+function FinancialReport({ dbStats, dbDistribution, dbInvoices }) {
     const financialStats = [
         {
             label: "Total Asset Value",
-            value: "$124,500",
+            value: `$${dbStats.totalAsset.toLocaleString()}`,
             change: "+12%",
             isUp: true,
             icon: Wallet,
@@ -27,7 +25,7 @@ function FinancialReport() {
         },
         {
             label: "Material Expenses",
-            value: "$45,200",
+            value: `$${dbStats.materialExpenses.toLocaleString()}`,
             change: "+5.4%",
             isUp: true,
             icon: CreditCard,
@@ -36,7 +34,7 @@ function FinancialReport() {
         },
         {
             label: "Waste Recovery",
-            value: "$3,150",
+            value: `$${dbStats.wasteRecovery.toLocaleString()}`,
             change: "-2.1%",
             isUp: false,
             icon: TrendingUp,
@@ -45,7 +43,7 @@ function FinancialReport() {
         },
         {
             label: "Pending Payments",
-            value: "$12,800",
+            value: `$${dbStats.pendingPayments.toLocaleString()}`,
             change: "Action Required",
             isUp: false,
             icon: DollarSign,
@@ -54,12 +52,17 @@ function FinancialReport() {
         },
     ];
 
+    const invoices = dbInvoices || [
+        { vendor: "Rahim Textiles", amount: "$4,500", status: "Paid" },
+        { vendor: "Global Chemicals", amount: "$2,800", status: "Pending" },
+        { vendor: "Eco Fabric Hub", amount: "$1,200", status: "Paid" },
+    ];
+
     return (
         <AdminLayout>
             <Head title="Financial Analytics | Admin" />
 
             <div className="p-6 max-w-[1600px] mx-auto">
-                {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4">
                     <div>
                         <h1 className="text-3xl font-black text-white flex items-center gap-3">
@@ -76,7 +79,6 @@ function FinancialReport() {
                     </div>
                 </div>
 
-                {/* Top Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
                     {financialStats.map((stat, i) => (
                         <motion.div
@@ -115,9 +117,7 @@ function FinancialReport() {
                     ))}
                 </div>
 
-                {/* Main Content Area */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Expense Breakdown */}
                     <div className="lg:col-span-2 bg-[#0F1219]/80 border border-white/5 rounded-[3rem] p-10 backdrop-blur-xl">
                         <div className="flex justify-between items-center mb-10">
                             <h3 className="text-white font-black uppercase text-xs tracking-widest flex items-center gap-2">
@@ -135,26 +135,25 @@ function FinancialReport() {
                         <div className="space-y-10">
                             <FinanceBar
                                 label="Yarn Procurement"
-                                amount="$85,000"
-                                percent={65}
+                                amount={`$${dbDistribution.yarn.amount.toLocaleString()}`}
+                                percent={dbDistribution.yarn.val}
                                 color="bg-emerald-500"
                             />
                             <FinanceBar
                                 label="Chemicals & Dyes"
-                                amount="$25,000"
-                                percent={20}
+                                amount={`$${dbDistribution.chemicals.amount.toLocaleString()}`}
+                                percent={dbDistribution.chemicals.val}
                                 color="bg-blue-500"
                             />
                             <FinanceBar
                                 label="Fabric & Accessories"
-                                amount="$14,500"
-                                percent={15}
+                                amount={`$${dbDistribution.fabric.amount.toLocaleString()}`}
+                                percent={dbDistribution.fabric.val}
                                 color="bg-indigo-500"
                             />
                         </div>
                     </div>
 
-                    {/* Quick Action/Summary Card */}
                     <div className="space-y-6">
                         <div className="bg-emerald-600/5 border border-emerald-500/20 rounded-[2.5rem] p-8 shadow-xl">
                             <h4 className="text-white font-black text-xl mb-4 uppercase tracking-tighter">
@@ -162,8 +161,8 @@ function FinancialReport() {
                             </h4>
                             <p className="text-slate-400 text-xs leading-relaxed mb-6 font-medium">
                                 Based on current inventory consumption and
-                                production rate, the estimated gross margin for
-                                this quarter is projected to increase by 8.5%.
+                                production rate, the gross margin is projected
+                                to increase.
                             </p>
                             <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
                                 <span className="text-[10px] font-black text-slate-500 uppercase">
@@ -180,21 +179,14 @@ function FinancialReport() {
                                 Recent Large Invoices
                             </h4>
                             <div className="space-y-4">
-                                <InvoiceItem
-                                    vendor="Rahim Textiles"
-                                    amount="$4,500"
-                                    status="Paid"
-                                />
-                                <InvoiceItem
-                                    vendor="Global Chemicals"
-                                    amount="$2,800"
-                                    status="Pending"
-                                />
-                                <InvoiceItem
-                                    vendor="Eco Fabric Hub"
-                                    amount="$1,200"
-                                    status="Paid"
-                                />
+                                {invoices.map((inv, i) => (
+                                    <InvoiceItem
+                                        key={i}
+                                        vendor={inv.vendor}
+                                        amount={inv.amount}
+                                        status={inv.status}
+                                    />
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -204,7 +196,6 @@ function FinancialReport() {
     );
 }
 
-// সাব-কম্পোনেন্ট: খরচ দেখানোর বার
 function FinanceBar({ label, amount, percent, color }) {
     return (
         <div>
@@ -230,14 +221,13 @@ function FinanceBar({ label, amount, percent, color }) {
                 <motion.div
                     initial={{ width: 0 }}
                     animate={{ width: `${percent}%` }}
-                    className={`h-full ${color} shadow-[0_0_15px_rgba(16,185,129,0.2)]`}
+                    className={`h-full ${color}`}
                 />
             </div>
         </div>
     );
 }
 
-// সাব-কম্পোনেন্ট: ছোট ইনভয়েস লিস্ট
 function InvoiceItem({ vendor, amount, status }) {
     return (
         <div className="flex justify-between items-center p-3 rounded-2xl bg-white/5 border border-white/5">

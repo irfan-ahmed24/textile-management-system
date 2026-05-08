@@ -24,10 +24,9 @@ export default function StockOutScannerModal({ show, onClose, onScan }) {
                         <BarcodeScannerComponent
                             width="100%"
                             height={400}
-                            onUpdate={onScan} // এখানে সরাসরি onScan পাস করা হয়েছে যা মেইন পেজের handleScan কল করবে
+                            onUpdate={onScan}
                         />
 
-                        {/* স্ক্যানিং এরিয়া হাইলাইটার */}
                         <div className="absolute inset-0 border-[40px] border-black/40 pointer-events-none flex items-center justify-center">
                             <div className="w-64 h-64 border-2 border-red-500 rounded-3xl"></div>
                         </div>

@@ -14,12 +14,12 @@ import {
     FilePieChart,
 } from "lucide-react";
 
-function InventoryReport() {
-    // রিপোর্ট ডাটা (কন্ট্রোলার থেকে আসা ডাইনামিক ডাটার ডামি ভার্সন)
+function InventoryReport({ dbSummary, dbTrend, dbDistribution }) {
+    // ডাটাবেস থেকে আসা ডাটা দিয়ে রিপোর্ট অ্যারে তৈরি
     const reportSummary = [
         {
             label: "Inventory Valuation",
-            value: "$45,280",
+            value: `$${dbSummary.valuation.toLocaleString()}`,
             trend: "+12.5%",
             isUp: true,
             icon: DollarSign,
@@ -28,7 +28,7 @@ function InventoryReport() {
         },
         {
             label: "Purchase (This Month)",
-            value: "$12,400",
+            value: `$${dbSummary.purchase.toLocaleString()}`,
             trend: "+5.2%",
             isUp: true,
             icon: PackageCheck,
@@ -37,7 +37,7 @@ function InventoryReport() {
         },
         {
             label: "Consumption Value",
-            value: "$8,900",
+            value: `$${dbSummary.consumption.toLocaleString()}`,
             trend: "-2.1%",
             isUp: false,
             icon: FilePieChart,
@@ -46,7 +46,7 @@ function InventoryReport() {
         },
         {
             label: "Waste Value",
-            value: "$420",
+            value: `$${dbSummary.waste.toLocaleString()}`,
             trend: "-15%",
             isUp: false,
             icon: Scale,
@@ -123,7 +123,6 @@ function InventoryReport() {
                                     <stat.icon size={24} />
                                 </div>
                             </div>
-                            {/* Decorative Background Blur */}
                             <div
                                 className={`absolute -right-4 -bottom-4 w-24 h-24 rounded-full blur-[50px] opacity-10 ${stat.bg}`}
                             ></div>
@@ -132,30 +131,27 @@ function InventoryReport() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Monthly Expenditure Chart Placeholder */}
+                    {/* Monthly Trend Chart */}
                     <div className="lg:col-span-2 bg-[#0F1219]/80 border border-white/5 rounded-[3rem] p-8 backdrop-blur-xl min-h-[400px]">
                         <div className="flex justify-between items-center mb-8">
                             <h3 className="text-white font-black uppercase text-xs tracking-widest flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full bg-indigo-500"></div>{" "}
+                                <div className="w-2 h-2 rounded-full bg-indigo-500"></div>
                                 Stock Valuation Trend
                             </h3>
                         </div>
-                        {/* গ্রাফের জন্য জায়গা - আপনি এখানে Recharts ব্যবহার করতে পারেন */}
                         <div className="h-64 flex items-end justify-between gap-4 px-4">
-                            {[40, 70, 45, 90, 65, 80, 50, 85, 30, 95].map(
-                                (h, i) => (
-                                    <motion.div
-                                        key={i}
-                                        initial={{ height: 0 }}
-                                        animate={{ height: `${h}%` }}
-                                        className="w-full bg-indigo-500/20 border-t-2 border-indigo-500 rounded-t-lg relative group"
-                                    >
-                                        <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                            Value: {h}k
-                                        </div>
-                                    </motion.div>
-                                ),
-                            )}
+                            {dbTrend.map((h, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ height: 0 }}
+                                    animate={{ height: `${h}%` }}
+                                    className="w-full bg-indigo-500/20 border-t-2 border-indigo-500 rounded-t-lg relative group"
+                                >
+                                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 bg-white text-black text-[10px] font-black px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                        Value: {h}k
+                                    </div>
+                                </motion.div>
+                            ))}
                         </div>
                         <div className="flex justify-between mt-6 px-4 text-slate-600 text-[10px] font-bold uppercase tracking-widest">
                             <span>Jan</span>
@@ -177,37 +173,61 @@ function InventoryReport() {
                             Asset Distribution
                         </h3>
                         <div className="space-y-6">
+                            {/* Yarn */}
                             <div className="space-y-3">
                                 <div className="flex justify-between text-[10px] font-black uppercase">
                                     <span className="text-slate-400">
                                         Yarn Inventory
                                     </span>
-                                    <span className="text-white">65%</span>
+                                    <span className="text-white">
+                                        {dbDistribution.yarn}%
+                                    </span>
                                 </div>
                                 <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full w-[65%] bg-indigo-500"></div>
+                                    <div
+                                        className="h-full bg-indigo-500"
+                                        style={{
+                                            width: `${dbDistribution.yarn}%`,
+                                        }}
+                                    ></div>
                                 </div>
                             </div>
+                            {/* Fabric */}
                             <div className="space-y-3">
                                 <div className="flex justify-between text-[10px] font-black uppercase">
                                     <span className="text-slate-400">
                                         Fabric Stock
                                     </span>
-                                    <span className="text-white">25%</span>
+                                    <span className="text-white">
+                                        {dbDistribution.fabric}%
+                                    </span>
                                 </div>
                                 <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full w-[25%] bg-emerald-500"></div>
+                                    <div
+                                        className="h-full bg-emerald-500"
+                                        style={{
+                                            width: `${dbDistribution.fabric}%`,
+                                        }}
+                                    ></div>
                                 </div>
                             </div>
+                            {/* Chemicals */}
                             <div className="space-y-3">
                                 <div className="flex justify-between text-[10px] font-black uppercase">
                                     <span className="text-slate-400">
                                         Chemicals
                                     </span>
-                                    <span className="text-white">10%</span>
+                                    <span className="text-white">
+                                        {dbDistribution.chemicals}%
+                                    </span>
                                 </div>
                                 <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden">
-                                    <div className="h-full w-[10%] bg-amber-500"></div>
+                                    <div
+                                        className="h-full bg-amber-500"
+                                        style={{
+                                            width: `${dbDistribution.chemicals}%`,
+                                        }}
+                                    ></div>
                                 </div>
                             </div>
                         </div>
