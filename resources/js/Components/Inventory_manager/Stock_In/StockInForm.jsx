@@ -20,6 +20,7 @@ export default function StockInForm({
     categories,
     units,
 }) {
+    console.log(data);
     return (
         <motion.div
             initial={{ opacity: 0, y: 20 }}

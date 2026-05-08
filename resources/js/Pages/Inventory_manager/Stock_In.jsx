@@ -11,7 +11,7 @@ import {
     units,
 } from "@/Components/Inventory_manager/Stock_In/stockInData";
 
-// Toast ইমপোর্ট করুন
+// Toast ইমপোর্ট
 import toast, { Toaster } from "react-hot-toast";
 
 function Stock_In() {
@@ -29,25 +29,60 @@ function Stock_In() {
 
     const handleScan = (err, result) => {
         if (result) {
-            const qrData = result.text.split(",");
-            if (qrData.length >= 2) {
-                setData((prev) => ({
-                    ...prev,
-                    item_name: qrData[0].trim(),
-                    item_code: qrData[1].trim(),
-                    category: qrData[2] ? qrData[2].trim() : prev.category,
-                }));
-            } else {
-                setData("item_code", result.text.trim());
+            const rawText = result.text; // "REQ_ID:2|NAME:Yarn|BY:mostak...|CODE:MTR-23|QTY:300.00"
+
+            try {
+                // ডাটা যদি পাইপ "|" ফরম্যাটে থাকে
+                if (rawText.includes("|")) {
+                    const parts = rawText.split("|");
+                    const extractedData = {};
+
+                    parts.forEach((part) => {
+                        const [key, value] = part.split(":");
+                        if (key && value) {
+                            extractedData[key.trim()] = value.trim();
+                        }
+                    });
+
+                    // ডাটাবেস কলাম অনুযায়ী ম্যাপ করা
+                    setData((prev) => ({
+                        ...prev,
+                        item_name: extractedData["NAME"] || prev.item_name,
+                        item_code:
+                            extractedData["CODE"] ||
+                            extractedData["REQ_ID"] ||
+                            prev.item_code,
+                        quantity: extractedData["QTY"] || prev.quantity,
+                    }));
+                }
+                // ব্যাকআপ: যদি কমা ফরম্যাটে থাকে
+                else if (rawText.includes(",")) {
+                    const qrData = rawText.split(",");
+                    setData((prev) => ({
+                        ...prev,
+                        item_name: qrData[0].trim(),
+                        item_code: qrData[1].trim(),
+                        category: qrData[2] ? qrData[2].trim() : prev.category,
+                    }));
+                }
+                // সাধারণ টেক্সট হলে শুধু কোড বক্সে বসবে
+                else {
+                    setData("item_code", rawText.trim());
+                }
+
+                toast.success("QR Data Parsed!", {
+                    style: {
+                        borderRadius: "15px",
+                        background: "#1F2937",
+                        color: "#fff",
+                    },
+                });
+            } catch (error) {
+                console.error("Parsing Error:", error);
+                toast.error("Failed to read QR structure.");
             }
+
             setShowScanner(false);
-            toast.success("QR Code Scanned!", {
-                style: {
-                    borderRadius: "15px",
-                    background: "#1F2937",
-                    color: "#fff",
-                },
-            });
         }
     };
 
@@ -91,7 +126,6 @@ function Stock_In() {
         <InventoryLayout>
             <Head title="Stock Entry | TextileMS" />
 
-            {/* Toast Container */}
             <Toaster />
 
             <div className="p-6 max-w-[1600px] mx-auto relative">
