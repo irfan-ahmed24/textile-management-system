@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 
 function FinancialReport() {
-    // আর্থিক ডাটা সামারি
     const financialStats = [
         {
             label: "Total Asset Value",
